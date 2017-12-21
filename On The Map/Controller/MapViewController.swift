@@ -11,6 +11,8 @@ import MapKit
 
 class MapViewController: UIViewController, MKMapViewDelegate {
 
+    let appDelegate = UIApplication.shared.delegate as! AppDelegate
+
     @IBOutlet weak var mapView: MKMapView!
     
     override func viewDidLoad() {
@@ -20,18 +22,49 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     }
 
     func loadLocations() {
-        let _ = Client.sharedInstance().taskForGETMethod(Client.sharedInstance().sessionID, "\(Client.Constants.Parse.baseURL)\(Client.Constants.Parse.StudentLocation)", handler: { (success, errorString) in
+        let _ = Client.sharedInstance().taskForGETMethod("\(Constants.Methods.ParseStudentLocation)", completionHandlerGET: { (success, errorString) in
             if success {
 
                 performUIUpdatesOnMain {
                     self.mapView.addAnnotations(self.pinLocations())
                 }
-                
+
             } else {
                 let alert = Alerts.errorAlert(title: "Check your network!", message: errorString)
                 self.present(alert, animated: true, completion: nil)
             }
         })
+    }
+    
+    @IBAction func logoutTouched(_ sender: Any) {
+        Client.sharedInstance().logout({ (success, error) in
+            if success {
+                performUIUpdatesOnMain {
+                    self.dismiss(animated: true, completion: nil)
+                }
+            }
+        })
+    }
+    
+    @IBAction func refreshTouched(_ sender: Any) {
+//        let _ = Client.sharedInstance().putStudentLocation(userId: (appDelegate.user?.userId)!, completionHandlerForPUTStudentLoc: { (value, errorString) in
+//            if value != nil {
+//                performUIUpdatesOnMain {
+//                    print("testMap")
+//                    self.mapView.reloadInputViews()
+//                }
+//            } else {
+//                let message = (errorString) ?? "Check your connection, we could not reload the information."
+//                let alert = Alerts.errorAlert(title: "Failed to Reload!", message: message)
+//                self.present(alert, animated: true, completion: nil)
+//            }
+//        })
+        loadLocations()
+    }
+ 
+    @IBAction func addTouched(_ sender: Any) {
+        let controller = storyboard!.instantiateViewController(withIdentifier: "LocationNavigationController") as! UINavigationController
+        present(controller, animated: true, completion: nil)
     }
     
     // MARK: Pin Students on Map
@@ -82,7 +115,6 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         else {
             pinView!.annotation = annotation
         }
-        
         return pinView
     }
     

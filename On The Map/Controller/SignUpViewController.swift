@@ -15,8 +15,8 @@ class SignUpViewController: UIViewController, UIWebViewDelegate, WKUIDelegate {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-
-        loadWebView(URL(string: Client.Constants.Udacity.SignUpURL)!) { (success, savedData, errorString) in
+        
+        loadWebView(URL(string: Constants.SignUpURL)!) { (success, savedData, errorString) in
             if success {
                 Client.sharedInstance().webLogin(savedData, { (success, errorString, sessionID) in
                     if success {
@@ -58,7 +58,8 @@ class SignUpViewController: UIViewController, UIWebViewDelegate, WKUIDelegate {
         task.resume()
     }
     
-    func loadWebRequest() {
+    func webView(_ webView: UIWebView, shouldStartLoadWith request: URLRequest, navigationType: UIWebViewNavigationType) -> Bool {
+        return true
     }
     
     @IBAction func doneTouched(_ sender: Any) {

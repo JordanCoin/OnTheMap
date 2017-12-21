@@ -11,25 +11,27 @@ import MapKit
 
 class CurrentLocationViewController: UIViewController, MKMapViewDelegate {
 
-    let studentLocation: StudentLocation! = nil
+    var user: User?
+    var link: String?
+    var location: String?
     var longitude = Double()
     var latitude = Double()
-    var link = String()
     
     @IBOutlet weak var mapView: MKMapView!
     @IBOutlet weak var finishButton: BorderedButton!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        print("long: \(longitude) lat: \(latitude) link: \(link)")
         mapView.delegate = self
-        mapView.reloadInputViews()
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
         performUIUpdatesOnMain {
             self.mapView.addAnnotation(self.pinLocation())
         }
+    }
+    
+    func finalInit(user: User, location: String, mediaURL: String) {
+        self.user = user
+        self.location = location
+        self.link = mediaURL
     }
     
     func pinLocation() -> MKAnnotation {
@@ -41,8 +43,11 @@ class CurrentLocationViewController: UIViewController, MKMapViewDelegate {
         
         let coordinate = CLLocationCoordinate2DMake(lat, long)
         
-
-        let name = ("\(studentLocation.firstName) \(studentLocation.lastName)")
+        var name: String? = nil
+        
+        if let student = StudentLocationCollection.totalLocations.first {
+            name = ("\(student.firstName) \(student.lastName)")
+        }
         
         annotation.coordinate = coordinate
         annotation.title = name
@@ -70,16 +75,32 @@ class CurrentLocationViewController: UIViewController, MKMapViewDelegate {
     }
  
     @IBAction func finishButtonTouched(_ sender: Any) {
+        postStudentLocation()
+    }
+    
+    func postStudentLocation() {
         
-        let _ = Client.sharedInstance().taskForPOSTMethod(Client.sharedInstance().sessionID!, latitude, longitude, link) { (success, errorString) in
-            if success {
-                performUIUpdatesOnMain({
-                    print("test passed")
-                })
-            } else {
-                let alert = Alerts.errorAlert(title: "Error posting location!", message: errorString)
+        guard let userID = user?.userId,
+            let firstName = user?.firstName,
+            let lastName = user?.lastName,
+            let mediaURL = link,
+            let location = location
+            else {
+                let alert = Alerts.errorAlert(title: "Error posting Data!", message: "Could not unwrap properties passed in")
                 self.present(alert, animated: true, completion: nil)
+                return
+        }
+        
+        let _ = Client.sharedInstance().postStudentLocation(userId: userID, firstName: firstName, lastName: lastName, mediaURL: mediaURL, latitude: latitude, longitude: longitude, location: location) { (results, errorString) in
+            
+            guard (errorString == nil) else {
+                let alert = Alerts.errorAlert(title: "Sorry, but we could not successfully post your location", message: errorString)
+                self.present(alert, animated: true, completion: nil)
+                return
             }
+            
+            // dismiss the information posting view
+            self.dismiss(animated: true, completion: nil)
         }
     }
     

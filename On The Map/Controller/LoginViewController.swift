@@ -10,8 +10,7 @@ import UIKit
 
 class LoginViewController: UIViewController {
     
-    var locations: StudentLocation!
-//    var sessionID: String? = nil
+    let appDelegate = UIApplication.shared.delegate as! AppDelegate
 
     @IBOutlet weak var loginButton: BorderedButton!
     @IBOutlet weak var emailTextField: UITextField!
@@ -34,30 +33,57 @@ class LoginViewController: UIViewController {
     // Login Actions
     
     @IBAction func loginTouched(_ sender: Any) {
-        login()
+        performUIUpdatesOnMain {
+            self.login()
+        }
     }
     
     func login() {
         if credentialsFilled() {
-            if let email = emailTextField.text, let password = passwordTextField.text {
+            if let username = emailTextField.text, let password = passwordTextField.text {
                 
-                // Get Session ID to authenticate login
-                Client.sharedInstance().getSessionID(email, password, { (success, sessionID, errorString) in
-                    performUIUpdatesOnMain {
-                        
-                        if success {
-                            Client.sharedInstance().sessionID = sessionID
-                            let controller = self.storyboard!.instantiateViewController(withIdentifier: "StudentNavigationController") as! UINavigationController
-                            self.present(controller, animated: true, completion: nil)
-                            
-                        } else {
-                            let alert = Alerts.errorAlert(title: "Error logging in", message: errorString)
-                            self.present(alert, animated: true, completion: nil)
-                        }
+                Client.sharedInstance().getSessionID(username, password) { (sessionID, error) in
+                    guard (error == nil) else {
+                        let alert = Alerts.errorAlert(title: "Error logging in", message: error)
+                        self.present(alert, animated: true, completion: nil)
+                        return
                     }
-                })
+                    
+                    guard let userID = sessionID else {
+                        let alert = Alerts.errorAlert(title: "Error logging in", message: error)
+                        self.present(alert, animated: true, completion: nil)
+                        return
+                    }
+                    self.completeLogin(userID: userID)
+                }
             }
         }
+    }
+    
+    func completeLogin(userID: String) {
+        
+        Client.sharedInstance().getUdacityUserInfo(userID: userID) { (result, error) in
+            guard (error == nil) else {
+                let alert = Alerts.errorAlert(title: "Error logging in", message: error)
+                self.present(alert, animated: true, completion: nil)
+                return
+            }
+            
+            guard let user = result else {
+                let alert = Alerts.errorAlert(title: "Error logging in", message: "Could not retrieve the custom USER struct from the Udacity users API")
+                self.present(alert, animated: true, completion: nil)
+                return
+            }
+
+            // save the user and show the main nav bar controller
+            self.appDelegate.user = user
+            self.showMainTabController()
+        }
+    }
+    
+    func showMainTabController() {
+        let controller = self.storyboard?.instantiateViewController(withIdentifier: "StudentMainTabBarController") as! UITabBarController
+        present(controller, animated: true, completion: nil)
     }
     
     func credentialsFilled() -> Bool {

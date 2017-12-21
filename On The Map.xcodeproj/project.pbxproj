@@ -22,11 +22,12 @@
 		898E78AA1FBB8EF4000E5CF7 /* GCDBlackBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 898E78A91FBB8EF4000E5CF7 /* GCDBlackBox.swift */; };
 		89959D111FAE4793008EAD92 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89959D101FAE4793008EAD92 /* Constants.swift */; };
 		89959D131FAE4D21008EAD92 /* Client.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89959D121FAE4D21008EAD92 /* Client.swift */; };
-		89959D151FAEC656008EAD92 /* StudentLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89959D141FAEC656008EAD92 /* StudentLocation.swift */; };
+		89959D151FAEC656008EAD92 /* Student.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89959D141FAEC656008EAD92 /* Student.swift */; };
 		89959D171FB51DC1008EAD92 /* SignUpViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89959D161FB51DC1008EAD92 /* SignUpViewController.swift */; };
 		89CC88511FBE337F00F5DA8B /* Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89CC88501FBE337F00F5DA8B /* Convenience.swift */; };
 		89CC88531FBE4A8E00F5DA8B /* MainTabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89CC88521FBE4A8E00F5DA8B /* MainTabBarController.swift */; };
 		89CC88561FBE8B0A00F5DA8B /* BorderedButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89CC88551FBE8B0A00F5DA8B /* BorderedButton.swift */; };
+		89F605E21FE9BB3700582D05 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89F605E11FE9BB3700582D05 /* User.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -47,11 +48,12 @@
 		898E78A91FBB8EF4000E5CF7 /* GCDBlackBox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GCDBlackBox.swift; sourceTree = "<group>"; };
 		89959D101FAE4793008EAD92 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		89959D121FAE4D21008EAD92 /* Client.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Client.swift; sourceTree = "<group>"; };
-		89959D141FAEC656008EAD92 /* StudentLocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudentLocation.swift; sourceTree = "<group>"; };
+		89959D141FAEC656008EAD92 /* Student.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Student.swift; sourceTree = "<group>"; };
 		89959D161FB51DC1008EAD92 /* SignUpViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUpViewController.swift; sourceTree = "<group>"; };
 		89CC88501FBE337F00F5DA8B /* Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Convenience.swift; sourceTree = "<group>"; };
 		89CC88521FBE4A8E00F5DA8B /* MainTabBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabBarController.swift; sourceTree = "<group>"; };
 		89CC88551FBE8B0A00F5DA8B /* BorderedButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BorderedButton.swift; sourceTree = "<group>"; };
+		89F605E11FE9BB3700582D05 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -109,8 +111,9 @@
 		89959D0E1FAE4774008EAD92 /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				89959D141FAEC656008EAD92 /* Student.swift */,
+				89F605E11FE9BB3700582D05 /* User.swift */,
 				89959D0F1FAE4780008EAD92 /* Clients */,
-				89959D141FAEC656008EAD92 /* StudentLocation.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -250,9 +253,10 @@
 				89CC88531FBE4A8E00F5DA8B /* MainTabBarController.swift in Sources */,
 				898B25FC1FAB972300581A78 /* LoginViewController.swift in Sources */,
 				898B25FA1FAB972300581A78 /* AppDelegate.swift in Sources */,
+				89F605E21FE9BB3700582D05 /* User.swift in Sources */,
 				89959D131FAE4D21008EAD92 /* Client.swift in Sources */,
 				89215D761FD5FB170050B474 /* AddLocationViewController.swift in Sources */,
-				89959D151FAEC656008EAD92 /* StudentLocation.swift in Sources */,
+				89959D151FAEC656008EAD92 /* Student.swift in Sources */,
 				896BD3351FCB7BEF0006BCF7 /* LocationTableViewCell.swift in Sources */,
 				898E78A61FB76ADB000E5CF7 /* Alerts.swift in Sources */,
 				89959D111FAE4793008EAD92 /* Constants.swift in Sources */,

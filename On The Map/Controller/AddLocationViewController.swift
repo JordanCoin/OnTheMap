@@ -12,6 +12,7 @@ import CoreLocation
 class AddLocationViewController: UIViewController {
     
     lazy var geocode = CLGeocoder()
+    let appDelegate = UIApplication.shared.delegate as! AppDelegate
     var longitude: Double? = nil
     var latitude: Double? = nil
     var link: String? = nil
@@ -27,7 +28,9 @@ class AddLocationViewController: UIViewController {
     
     @IBAction func findLocationTouched(_ sender: Any) {
         if credentialsFilled() {
-            findLoc()
+            performUIUpdatesOnMain {
+                self.findLoc()
+            }
         }
     }
     
@@ -73,11 +76,13 @@ class AddLocationViewController: UIViewController {
     
     override func performSegue(withIdentifier identifier: String, sender: Any?) {
         if identifier == "presentLocSegue" {
-            let currentLocVC = storyboard?.instantiateViewController(withIdentifier: "CurrentLocationViewController") as! CurrentLocationViewController
-            currentLocVC.link = link!
-            currentLocVC.latitude = latitude!
-            currentLocVC.longitude = longitude!
-            navigationController?.pushViewController(currentLocVC, animated: true)
+            if let currentLocVC = storyboard?.instantiateViewController(withIdentifier: "CurrentLocationViewController") as? CurrentLocationViewController, let location = locationTextField.text, let user = appDelegate.user {
+                
+                currentLocVC.latitude = latitude!
+                currentLocVC.longitude = longitude!
+                currentLocVC.finalInit(user: user, location: location, mediaURL: link!)
+                navigationController?.pushViewController(currentLocVC, animated: true)
+            }
         }
     }
     
