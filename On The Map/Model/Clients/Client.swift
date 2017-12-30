@@ -14,15 +14,10 @@ class Client: NSObject {
     // MARK: Properties
     
     var session = URLSession.shared
-//    var sessionID: String? = nil
-    var latitude: Double! = nil
-    var longitude: Double! = nil
-    var firstName: String! = nil
-    var lastName: String! = nil
     
     // MARK: GET - Student Locations
 
-    func taskForGETMethod(_ requestMethod: String, completionHandlerGET: @escaping (_ success: Bool, _ errorString: String) -> Void) {
+    func taskForGETMethod(_ requestMethod: String, completionHandlerGET: @escaping (_ result: AnyObject?, _ errorString: String?) -> Void) -> URLSessionDataTask {
         
         let url = "\(Constants.ParseURL)\(requestMethod)?\(Constants.ParameterKeys.Limit)=100&\(Constants.ParameterKeys.Order)=-\(Constants.ParameterKeys.UpdatedAt)"
         
@@ -33,7 +28,7 @@ class Client: NSObject {
         let task = session.dataTask(with: request as URLRequest) { data, response, error in
             
             func sendError(error: String) {
-                completionHandlerGET(false, error)
+                completionHandlerGET(nil, error)
             }
             
             /* GUARD: Was there an error? */
@@ -56,33 +51,15 @@ class Client: NSObject {
             
             /* 5/6. Parse the data and use the data (happens in completion handler) */
             
-            do {
-                let parsedData = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as! [String: Any]
-                guard let results = parsedData["results"] as? [[String: Any]] else { return }
-
-                let decoder = JSONDecoder()
-                
-                for locations in results {
-                    
-                    if (locations["uniqueKey"] as? String) != nil {
-                        let studentData = try JSONSerialization.data(withJSONObject: locations, options: .prettyPrinted)
-                        let students = try decoder.decode(Student.self, from: studentData)
-                        StudentLocationCollection.add(location: students)
-                        completionHandlerGET(true, "Could not parse \(studentData)")
-                    }
-                }
-            } catch {
-                completionHandlerGET(false, "Could not parse \(data)")
-                return
-            }
-            
+            self.convertDataWithCompletionHandler(data: data, completionHandlerForConvertData: completionHandlerGET)
         }
         task.resume()
+        return task
     }
     
     // MARK: POST - Create a new student location
     
-    func taskForPOSTMethod(_ requestMethod: String, jsonBody: String, completionHandlerPOST: @escaping (_ result: AnyObject?, _ errorString: String?) -> Void) {
+    func taskForPOSTMethod(_ requestMethod: String, jsonBody: String, completionHandlerPOST: @escaping (_ result: AnyObject?, _ errorString: String?) -> Void) -> URLSessionDataTask {
         
         let request = NSMutableURLRequest(url: URL(string: "\(Constants.ParseURL)\(requestMethod)")!)
         request.httpMethod = "POST"
@@ -119,65 +96,7 @@ class Client: NSObject {
             
         }
         task.resume()
-    }
-    
-    // MARK: PUT - Update existing student locations
-    
-    func taskForPUTMethod(_ requestMethod: String, jsonBody: String, completionHandlerPUT: @escaping (_ result: AnyObject?, _ errorString: String?) -> Void) {
-        
-        let request = NSMutableURLRequest(url: URL(string: "\(Constants.ParseURL)\(requestMethod)")!)
-        request.httpMethod = "PUT"
-        request.addValue(Constants.AppID, forHTTPHeaderField: "X-Parse-Application-Id")
-        request.addValue(Constants.ApiKey, forHTTPHeaderField: "X-Parse-REST-API-Key")
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = jsonBody.data(using: .utf8)
-        
-        let task = session.dataTask(with: request as URLRequest) { data, response, error in
-            
-            func sendError(error: String) {
-                completionHandlerPUT(nil, error)
-            }
-            
-            /* GUARD: Was there an error? */
-            guard (error == nil) else {
-                sendError(error: "There was an error with your POST request \(error!)")
-                return
-            }
-            
-            /* GUARD: Did we get a successful 2XX response? */
-            guard let statusCode = (response as? HTTPURLResponse)?.statusCode, statusCode >= 200 && statusCode <= 299 else {
-                sendError(error: "The request did not return a valid 2xx httpStatusCode for the POST")
-                return
-            }
-            
-            /* GUARD: Was there any data returned? */
-            guard let data = data else {
-                sendError(error: "There was no data returned in the POST request")
-                return
-            }
-            
-            do {
-                let parsedData = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as! [String: Any]
-                guard let results = parsedData["results"] as? [[String: Any]] else { return }
-                
-                let decoder = JSONDecoder()
-                
-                for locations in results {
-                    
-                    if (locations["uniqueKey"] as? String) != nil {
-                        let studentData = try JSONSerialization.data(withJSONObject: locations, options: .prettyPrinted)
-                        let students = try decoder.decode(Student.self, from: studentData)
-                        StudentLocationCollection.add(location: students)
-                        completionHandlerPUT(nil, "Could not parse \(studentData)")
-                    }
-                }
-            } catch {
-                completionHandlerPUT(nil, "Could not parse \(data)")
-                return
-            }
-            
-        }
-        task.resume()
+        return task
     }
     
     func taskForUdacityGETMethod(_ method: String, completionForUdacityGET: @escaping (_ result: AnyObject?, _ error: String?) -> Void) -> URLSessionDataTask {

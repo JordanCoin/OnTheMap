@@ -38,24 +38,25 @@ extension Client {
     }
     
     // MARK: - POST Student Location Method
-    func putStudentLocation(userId: String, completionHandlerForPUTStudentLoc: @escaping (_ result: Int?, _ errorString: String?) -> Void) {
+    func getStudentLocation(_ completionHandlerForGETStudentLoc: @escaping (_ result: Student?, _ errorString: String?) -> Void) {
         
-        // create the jsonBody for the request and define the method to be used
-        let jsonBody = "{\"\(Constants.JSONBodyKeys.UniqueKey)\": \"\(userId)\""
-        
-        if let method = substituteKeyInMethod(Constants.Methods.ParsePutStudentLocation, key: "user_id", value: userId) {
+        let _ = taskForGETMethod(Constants.Methods.ParseStudentLocation) { (results, error) in
             
-            let _ = taskForPUTMethod(method, jsonBody: jsonBody) { (result, error) in
-                
-                // check to see if there was an error returned
-                guard (error == nil) else {
-                    completionHandlerForPUTStudentLoc(nil, error)
-                    return
-                }
-                
-                // if there was no error we know we had a successful response
-                completionHandlerForPUTStudentLoc(1, nil)
+            // check to see if there was an error returned
+            guard (error == nil) else {
+                completionHandlerForGETStudentLoc(nil, error)
+                return
             }
+            
+            guard let results = results?[Constants.JSONResponseKeys.Results] as? [[String:AnyObject]] else {
+                completionHandlerForGETStudentLoc(nil, error)
+                return
+            }
+            
+            // if there was no error we know we had a successful response
+            let students = Student.studentsFromResults(results: results)
+            
+            completionHandlerForGETStudentLoc(students, nil)
         }
     }
     
@@ -157,27 +158,5 @@ extension Client {
         }
         task.resume()
         
-    }
-    
-    // MARK: - Authentication Web Login Method
-    
-    func webLogin( _ data: Data, _ completionHandlerForSession: @escaping (_ success: Bool, _ sessionID: String?, _ errorString: String?) -> Void) {
-        
-        do {
-            let parsedData = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as! [String : Any]
-            
-            guard let results = parsedData[Constants.JSONResponseKeys.Session] as? [String: Any] else { return }
-            
-            for id in results {
-                var sessionID = String()
-                if id.key == Constants.JSONResponseKeys.SessionId {
-                    sessionID.append(id.value as! String)
-                    completionHandlerForSession(true, sessionID, nil)
-                }
-            }
-        } catch {
-            completionHandlerForSession(false, nil, "No sessionID found!")
-            return
-        }
     }
 }

@@ -404,7 +404,7 @@
         <!--On The Map-->
         <scene sceneID="Ndf-UT-QF6">
             <objects>
-                <tabBarController storyboardIdentifier="StudentMainTabBarController" id="ofx-IN-tNj" customClass="MainTabBarController" customModule="On_The_Map" customModuleProvider="target" sceneMemberID="viewController">
+                <tabBarController storyboardIdentifier="StudentMainTabBarController" id="ofx-IN-tNj" sceneMemberID="viewController">
                     <navigationItem key="navigationItem" title="On The Map" id="ZEM-ta-wtM">
                         <barButtonItem key="leftBarButtonItem" title="LOGOUT" id="Y75-u7-kYd">
                             <connections>
@@ -465,7 +465,7 @@
                         <viewLayoutGuide key="safeArea" id="YQF-Ck-gTm"/>
                     </view>
                     <navigationItem key="navigationItem" title="Sign Up" id="Jrw-p7-eIN">
-                        <barButtonItem key="leftBarButtonItem" systemItem="cancel" id="ooi-8B-MZZ">
+                        <barButtonItem key="rightBarButtonItem" systemItem="done" id="ooi-8B-MZZ">
                             <connections>
                                 <action selector="doneTouched:" destination="Piy-ju-dlI" id="dlO-y0-2BE"/>
                             </connections>

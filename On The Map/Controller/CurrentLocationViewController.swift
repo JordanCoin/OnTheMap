@@ -4,7 +4,6 @@
 //
 //  Created by Jordan Jackson on 12/4/17.
 //  Copyright © 2017 Jordan Jackson. All rights reserved.
-//
 
 import UIKit
 import MapKit
@@ -14,8 +13,9 @@ class CurrentLocationViewController: UIViewController, MKMapViewDelegate {
     var user: User?
     var link: String?
     var location: String?
-    var longitude = Double()
-    var latitude = Double()
+    var longitude: Double?
+    var latitude: Double?
+    var students = [Student]()
     
     @IBOutlet weak var mapView: MKMapView!
     @IBOutlet weak var finishButton: BorderedButton!
@@ -28,29 +28,25 @@ class CurrentLocationViewController: UIViewController, MKMapViewDelegate {
         }
     }
     
-    func finalInit(user: User, location: String, mediaURL: String) {
+    func finalInit(user: User, location: String, mediaURL: String, longitude: Double, latitude: Double) {
         self.user = user
         self.location = location
         self.link = mediaURL
+        self.longitude = longitude
+        self.latitude = latitude
     }
     
     func pinLocation() -> MKAnnotation {
         
         let annotation = MKPointAnnotation()
 
-        let lat = CLLocationDegrees(latitude)
-        let long = CLLocationDegrees(longitude)
+        let lat = CLLocationDegrees(latitude!)
+        let long = CLLocationDegrees(longitude!)
         
         let coordinate = CLLocationCoordinate2DMake(lat, long)
         
-        var name: String? = nil
-        
-        if let student = StudentLocationCollection.totalLocations.first {
-            name = ("\(student.firstName) \(student.lastName)")
-        }
-        
         annotation.coordinate = coordinate
-        annotation.title = name
+        annotation.title = ("\(String(describing: user!.firstName)) \(String(describing: user!.lastName))")
         annotation.subtitle = link
         return annotation
     }
@@ -84,7 +80,9 @@ class CurrentLocationViewController: UIViewController, MKMapViewDelegate {
             let firstName = user?.firstName,
             let lastName = user?.lastName,
             let mediaURL = link,
-            let location = location
+            let location = location,
+            let latitude = latitude,
+            let longitude = longitude
             else {
                 let alert = Alerts.errorAlert(title: "Error posting Data!", message: "Could not unwrap properties passed in")
                 self.present(alert, animated: true, completion: nil)
@@ -99,7 +97,6 @@ class CurrentLocationViewController: UIViewController, MKMapViewDelegate {
                 return
             }
             
-            // dismiss the information posting view
             self.dismiss(animated: true, completion: nil)
         }
     }

@@ -61,7 +61,6 @@ class LoginViewController: UIViewController {
     }
     
     func completeLogin(userID: String) {
-        
         Client.sharedInstance().getUdacityUserInfo(userID: userID) { (result, error) in
             guard (error == nil) else {
                 let alert = Alerts.errorAlert(title: "Error logging in", message: error)

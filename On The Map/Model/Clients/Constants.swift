@@ -8,7 +8,6 @@
 
 import Foundation
 
-// MARK: Constants
 struct Constants {
     
     static let ApiKey = "QuWThTdiRmTux3YaDseUSEpUKo7aBYM737yKd4gY"
@@ -84,12 +83,4 @@ struct Constants {
         static let updatedAt = "updatedAt"
         static let createdAt = "createdAt"
     }
-    
-    //        struct ParameterKeys {
-    //            static let ApiKey = "api_key"
-    //            static let ID = "id"
-    //            static let Session = "session"
-    //            static let RequestToken = "request_token"
-    //            static let Query = "query"
-    //        }
 }

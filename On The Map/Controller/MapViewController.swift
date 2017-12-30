@@ -11,8 +11,8 @@ import MapKit
 
 class MapViewController: UIViewController, MKMapViewDelegate {
 
-    let appDelegate = UIApplication.shared.delegate as! AppDelegate
-
+    var students = Student()
+    
     @IBOutlet weak var mapView: MKMapView!
     
     override func viewDidLoad() {
@@ -22,16 +22,19 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     }
 
     func loadLocations() {
-        let _ = Client.sharedInstance().taskForGETMethod("\(Constants.Methods.ParseStudentLocation)", completionHandlerGET: { (success, errorString) in
-            if success {
-
-                performUIUpdatesOnMain {
-                    self.mapView.addAnnotations(self.pinLocations())
-                }
-
-            } else {
-                let alert = Alerts.errorAlert(title: "Check your network!", message: errorString)
+        let _ = Client.sharedInstance().getStudentLocation({ (value, errorString) in
+            
+            guard let value = value else {
+                let alert = Alerts.errorAlert(title: "Check your network!",message: "Could not get student information from the server. Please try again! \(String(describing: errorString))")
                 self.present(alert, animated: true, completion: nil)
+                return
+            }
+            
+            self.students = value
+            
+            performUIUpdatesOnMain {
+                self.mapView.addAnnotations(self.pinLocations())
+                self.mapView.reloadInputViews()
             }
         })
     }
@@ -47,18 +50,6 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     }
     
     @IBAction func refreshTouched(_ sender: Any) {
-//        let _ = Client.sharedInstance().putStudentLocation(userId: (appDelegate.user?.userId)!, completionHandlerForPUTStudentLoc: { (value, errorString) in
-//            if value != nil {
-//                performUIUpdatesOnMain {
-//                    print("testMap")
-//                    self.mapView.reloadInputViews()
-//                }
-//            } else {
-//                let message = (errorString) ?? "Check your connection, we could not reload the information."
-//                let alert = Alerts.errorAlert(title: "Failed to Reload!", message: message)
-//                self.present(alert, animated: true, completion: nil)
-//            }
-//        })
         loadLocations()
     }
  
@@ -75,16 +66,16 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         var annotations = [MKPointAnnotation]()
         
         // Go through our StudentLocation array and create the pins
-        for dictionary in StudentLocationCollection.totalLocations {
+        for student in students.array {
 
-            let lat = CLLocationDegrees(dictionary.latitude!)
-            let long = CLLocationDegrees(dictionary.longitude!)
+            let lat = CLLocationDegrees(student.latitude)
+            let long = CLLocationDegrees(student.longitude)
 
             let coordinate = CLLocationCoordinate2DMake(lat, long)
             
-            let first = dictionary.firstName
-            let last = dictionary.lastName
-            let mediaURL = dictionary.mediaURL
+            let first = student.firstName
+            let last = student.lastName
+            let mediaURL = student.mediaURL
             
             // Here we create the annotation and set its coordiate, title, and subtitle properties
             let annotation = MKPointAnnotation()

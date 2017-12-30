@@ -8,10 +8,8 @@
 
 import Foundation
 
-// Custom USER Struct for the signed in user
 struct User {
     
-    // MARK: - Properties
     let firstName: String
     let lastName: String
     let userId: String

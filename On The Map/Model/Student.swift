@@ -2,45 +2,71 @@
 //  Student.swift
 //  On The Map
 //
-//  Created by Jordan Jackson on 11/5/17.
+//  Created by Jordan Jackson on 12/22/17.
 //  Copyright © 2017 Jordan Jackson. All rights reserved.
 //
 
 import Foundation
-import UIKit
 
-struct Student: Decodable {
+struct Student {
     
-    let objectID: String?
-    var uniqueKey: String?
+    let objectId: String
+    let uniqueKey: String
     let firstName: String
     let lastName: String
-    let mapString: String?
-    let mediaURL: String?
-    let latitude: Double?
-    let longitude: Double?
-    let updatedAt: String?
-    let createdAt: String?
-}
-
-/* Convenience methods and variables for accessing and altering the collection of StudentLocations */
-
-struct StudentLocationCollection {
+    let location: String
+    let mediaURL: String
+    let latitude: Double
+    let longitude: Double
+    var array = [Student]()
     
-    static var totalLocations: [Student] {
-        return storage().locations
+    init() {
+        objectId = ""
+        uniqueKey = ""
+        firstName = ""
+        lastName = ""
+        location = ""
+        mediaURL = ""
+        latitude = 0
+        longitude = 0
     }
     
-    static func add(location: Student) {
-        storage().locations.append(location)
+    init?(dictionary: [String:AnyObject]) {
+        
+        guard let objectId = dictionary[Constants.JSONResponseKeys.ObjectId] as? String,
+            let firstName = dictionary[Constants.JSONResponseKeys.FirstName] as? String,
+            let lastName = dictionary[Constants.JSONResponseKeys.LastName] as? String,
+            let location = dictionary[Constants.JSONResponseKeys.MapString] as? String,
+            let mediaURL = dictionary[Constants.JSONResponseKeys.MediaURL] as? String,
+            let latitude = dictionary[Constants.JSONResponseKeys.Latitude] as? Double,
+            let longitude = dictionary[Constants.JSONResponseKeys.Longitude] as? Double
+            else {
+                print("Uable to parse student dictionary. Check json input or parsing method")
+                return nil
+        }
+        
+        let uniqueKey = dictionary[Constants.JSONResponseKeys.UniqueKey] as? String ?? "jwilliamcj29@gmail.com"
+        
+        self.objectId = objectId
+        self.uniqueKey = uniqueKey
+        self.firstName = firstName
+        self.lastName = lastName
+        self.location = location
+        self.mediaURL = mediaURL
+        self.latitude = latitude
+        self.longitude = longitude
     }
     
-    static func count() -> Int {
-        return storage().locations.count
-    }
-    
-    static func storage() -> AppDelegate {
-        let object = UIApplication.shared.delegate
-        return object as! AppDelegate
+    static func studentsFromResults(results: [[String:AnyObject]]) -> Student {
+        
+        var students = Student()
+        
+        for result in results {
+            if let student = Student(dictionary: result) {
+                students.array.append(student)
+            }
+        }
+        
+        return students
     }
 }

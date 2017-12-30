@@ -35,18 +35,18 @@ class AddLocationViewController: UIViewController {
     }
     
     func findLoc() {
-            guard let savedlink = linkTextField.text, let location = locationTextField.text else {
-                let alert = Alerts.errorAlert(title: "Link Invalid", message: "Your link is not a valid url")
-                present(alert, animated: true, completion: nil)
-                return
-            }
-            geocode.geocodeAddressString(location, completionHandler: { (placemarks, error) in
-                self.processResponse(withPlacemarks: placemarks, processedLink: savedlink, error: error, { (success) in
-                    if success {
-                        self.performSegue(withIdentifier: "presentLocSegue", sender: self)
-                    }
-                })
+        guard let savedlink = linkTextField.text, let location = locationTextField.text else {
+            let alert = Alerts.errorAlert(title: "Link Invalid", message: "Your link is not a valid url")
+            present(alert, animated: true, completion: nil)
+            return
+        }
+        geocode.geocodeAddressString(location, completionHandler: { (placemarks, error) in
+            self.processResponse(withPlacemarks: placemarks, processedLink: savedlink, error: error, { (success) in
+                if success {
+                    self.performSegue(withIdentifier: "presentLocSegue", sender: self)
+                }
             })
+        })
     }
     
     private func processResponse(withPlacemarks placemarks: [CLPlacemark]?, processedLink: String, error: Error?, _ completion: @escaping (_ success: Bool) -> Void) {
@@ -78,9 +78,7 @@ class AddLocationViewController: UIViewController {
         if identifier == "presentLocSegue" {
             if let currentLocVC = storyboard?.instantiateViewController(withIdentifier: "CurrentLocationViewController") as? CurrentLocationViewController, let location = locationTextField.text, let user = appDelegate.user {
                 
-                currentLocVC.latitude = latitude!
-                currentLocVC.longitude = longitude!
-                currentLocVC.finalInit(user: user, location: location, mediaURL: link!)
+                currentLocVC.finalInit(user: user, location: location, mediaURL: link!, longitude: longitude!, latitude: latitude!)
                 navigationController?.pushViewController(currentLocVC, animated: true)
             }
         }
@@ -99,6 +97,7 @@ class AddLocationViewController: UIViewController {
     @IBAction func cancelTouched(_ sender: Any) {
         dismiss(animated: true, completion: nil)
     }
+    
 }
 
 extension AddLocationViewController: UITextFieldDelegate {
