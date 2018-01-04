@@ -28,9 +28,7 @@ class AddLocationViewController: UIViewController {
     
     @IBAction func findLocationTouched(_ sender: Any) {
         if credentialsFilled() {
-            performUIUpdatesOnMain {
-                self.findLoc()
-            }
+            findLoc()
         }
     }
     
@@ -43,7 +41,9 @@ class AddLocationViewController: UIViewController {
         geocode.geocodeAddressString(location, completionHandler: { (placemarks, error) in
             self.processResponse(withPlacemarks: placemarks, processedLink: savedlink, error: error, { (success) in
                 if success {
-                    self.performSegue(withIdentifier: "presentLocSegue", sender: self)
+                    DispatchQueue.main.async {
+                        self.performSegue(withIdentifier: "presentLocSegue", sender: self)
+                    }
                 }
             })
         })
@@ -51,25 +51,28 @@ class AddLocationViewController: UIViewController {
     
     private func processResponse(withPlacemarks placemarks: [CLPlacemark]?, processedLink: String, error: Error?, _ completion: @escaping (_ success: Bool) -> Void) {
         
-        if let error = error {
-            let alert = Alerts.errorAlert(title: "Unable to Forward Geocode Address", message: "Unable to Find Location for Address \(error.localizedDescription)")
-            present(alert, animated: true, completion: nil)
-        } else {
-            var location: CLLocation?
+        performUIUpdatesOnMain {
             
-            if let placemarks = placemarks, placemarks.count > 0 {
-                location = placemarks.first?.location
-            }
-            
-            if let location = location {
-                let coordinate = location.coordinate
-                link = processedLink
-                latitude = coordinate.latitude
-                longitude = coordinate.longitude
-                completion(true)
+            if let error = error {
+                let alert = Alerts.errorAlert(title: "Unable to Forward Geocode Address", message: "Unable to Find Location for Address \(error.localizedDescription)")
+                self.present(alert, animated: true, completion: nil)
             } else {
-                let alert = Alerts.errorAlert(title: "No Matching Location Found", message: "Unable to Find Location for Address")
-                present(alert, animated: true, completion: nil)
+                var location: CLLocation?
+                
+                if let placemarks = placemarks, placemarks.count > 0 {
+                    location = placemarks.first?.location
+                }
+                
+                if let location = location {
+                    let coordinate = location.coordinate
+                    self.link = processedLink
+                    self.latitude = coordinate.latitude
+                    self.longitude = coordinate.longitude
+                    completion(true)
+                } else {
+                    let alert = Alerts.errorAlert(title: "No Matching Location Found", message: "Unable to Find Location for Address")
+                    self.present(alert, animated: true, completion: nil)
+                }
             }
         }
     }
@@ -104,9 +107,13 @@ extension AddLocationViewController: UITextFieldDelegate {
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         if textField == locationTextField {
-            linkTextField.becomeFirstResponder()
+            DispatchQueue.main.async {
+                self.linkTextField.becomeFirstResponder()
+            }
         } else {
-            linkTextField.resignFirstResponder()
+            DispatchQueue.main.async {
+                self.linkTextField.resignFirstResponder()
+            }
             findLoc()
         }
         return true

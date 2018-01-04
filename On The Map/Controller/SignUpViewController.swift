@@ -17,9 +17,7 @@ class SignUpViewController: UIViewController, UIWebViewDelegate, WKUIDelegate {
         super.viewWillAppear(animated)
         
         let request = URLRequest(url: URL(string: Constants.SignUpURL)!)
-        performUIUpdatesOnMain {
-            self.webView.load(request)
-        }
+        webView.load(request)
     }
     
     @IBAction func doneTouched(_ sender: Any) {

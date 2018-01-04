@@ -28,7 +28,7 @@ class LocationTableViewController: UITableViewController {
             
             self.students = value
             
-            performUIUpdatesOnMain {
+            DispatchQueue.main.async {
                 self.tableView.reloadData()
             }
         })
@@ -37,7 +37,7 @@ class LocationTableViewController: UITableViewController {
     @IBAction func logoutTouched(_ sender: Any) {
         Client.sharedInstance().logout({ (success, error) in
             if success {
-                performUIUpdatesOnMain {
+                DispatchQueue.main.async {
                     self.dismiss(animated: true, completion: nil)
                 }
             }

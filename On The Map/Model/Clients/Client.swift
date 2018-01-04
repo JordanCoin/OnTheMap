@@ -11,6 +11,8 @@ import UIKit
 
 class Client: NSObject {
     
+    public typealias completionHandlerMethod = (AnyObject?, String?) -> Void
+    
     // MARK: Properties
     
     var session = URLSession.shared
@@ -61,6 +63,16 @@ class Client: NSObject {
     
     func taskForPOSTMethod(_ requestMethod: String, jsonBody: String, completionHandlerPOST: @escaping (_ result: AnyObject?, _ errorString: String?) -> Void) -> URLSessionDataTask {
         
+        /*
+        DispatchQueue.global(qos: .userInitiated).async { () -> Void in
+            
+            DispatchQueue.main.async(execute: { () -> Void in
+                
+            })
+            
+        }
+        */
+        
         let request = NSMutableURLRequest(url: URL(string: "\(Constants.ParseURL)\(requestMethod)")!)
         request.httpMethod = "POST"
         request.addValue(Constants.AppID, forHTTPHeaderField: "X-Parse-Application-Id")
@@ -99,11 +111,14 @@ class Client: NSObject {
         return task
     }
     
-    func taskForUdacityGETMethod(_ method: String, completionForUdacityGET: @escaping (_ result: AnyObject?, _ error: String?) -> Void) -> URLSessionDataTask {
+    // 12/31/17 Edited taskForUdacityGETMethod with DispatchQueue: Waiting for Update
+    // [                              - U P D A T E -                               ]
+    
+    func taskForUdacityGETMethod(_ method: String, completionForUdacityGET: @escaping completionHandlerMethod) -> URLSessionDataTask {
         
         let request = NSMutableURLRequest(url: URL(string: "\(Constants.UdacityURL)\(method)")!)
         
-        let task = session.dataTask(with: request as URLRequest) { (data, response, error) in
+        let task = self.session.dataTask(with: request as URLRequest) { (data, response, error) in
             
             func sendError(error: String) {
                 completionForUdacityGET(nil, error)
@@ -130,10 +145,10 @@ class Client: NSObject {
             
             let range = Range(5..<data.count)
             let newData = data.subdata(in: range)
-
+            
             self.convertDataWithCompletionHandler(data: newData, completionHandlerForConvertData: completionForUdacityGET)
+            
         }
-        
         task.resume()
         return task
     }

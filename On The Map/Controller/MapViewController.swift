@@ -32,17 +32,17 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             
             self.students = value
             
-            performUIUpdatesOnMain {
+            performUIUpdatesOnMain({
                 self.mapView.addAnnotations(self.pinLocations())
                 self.mapView.reloadInputViews()
-            }
+            })
         })
     }
     
     @IBAction func logoutTouched(_ sender: Any) {
         Client.sharedInstance().logout({ (success, error) in
             if success {
-                performUIUpdatesOnMain {
+                DispatchQueue.main.async {
                     self.dismiss(animated: true, completion: nil)
                 }
             }

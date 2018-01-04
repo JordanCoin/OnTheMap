@@ -33,9 +33,7 @@ class LoginViewController: UIViewController {
     // Login Actions
     
     @IBAction func loginTouched(_ sender: Any) {
-        performUIUpdatesOnMain {
-            self.login()
-        }
+        login()
     }
     
     func login() {
@@ -43,6 +41,9 @@ class LoginViewController: UIViewController {
             if let username = emailTextField.text, let password = passwordTextField.text {
                 
                 Client.sharedInstance().getSessionID(username, password) { (sessionID, error) in
+                    
+                    performUIUpdatesOnMain({
+                        
                     guard (error == nil) else {
                         let alert = Alerts.errorAlert(title: "Error logging in", message: error)
                         self.present(alert, animated: true, completion: nil)
@@ -54,7 +55,9 @@ class LoginViewController: UIViewController {
                         self.present(alert, animated: true, completion: nil)
                         return
                     }
-                    self.completeLogin(userID: userID)
+                    
+                        self.completeLogin(userID: userID)
+                    })
                 }
             }
         }
@@ -73,10 +76,11 @@ class LoginViewController: UIViewController {
                 self.present(alert, animated: true, completion: nil)
                 return
             }
-
-            // save the user and show the main nav bar controller
+            
             self.appDelegate.user = user
             self.showMainTabController()
+
+            // save the user and show the main nav bar controller
         }
     }
     
@@ -132,7 +136,9 @@ extension LoginViewController: UITextFieldDelegate {
         if textField == emailTextField {
             passwordTextField.becomeFirstResponder()
         } else {
-            passwordTextField.resignFirstResponder()
+            DispatchQueue.main.async {
+                self.passwordTextField.resignFirstResponder()
+            }
             login()
         }
         return true

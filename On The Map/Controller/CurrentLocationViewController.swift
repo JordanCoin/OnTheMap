@@ -23,9 +23,7 @@ class CurrentLocationViewController: UIViewController, MKMapViewDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         mapView.delegate = self
-        performUIUpdatesOnMain {
-            self.mapView.addAnnotation(self.pinLocation())
-        }
+        mapView.addAnnotation(pinLocation())
     }
     
     func finalInit(user: User, location: String, mediaURL: String, longitude: Double, latitude: Double) {
@@ -75,29 +73,30 @@ class CurrentLocationViewController: UIViewController, MKMapViewDelegate {
     }
     
     func postStudentLocation() {
-        
-        guard let userID = user?.userId,
-            let firstName = user?.firstName,
-            let lastName = user?.lastName,
-            let mediaURL = link,
-            let location = location,
-            let latitude = latitude,
-            let longitude = longitude
-            else {
-                let alert = Alerts.errorAlert(title: "Error posting Data!", message: "Could not unwrap properties passed in")
-                self.present(alert, animated: true, completion: nil)
-                return
-        }
-        
-        let _ = Client.sharedInstance().postStudentLocation(userId: userID, firstName: firstName, lastName: lastName, mediaURL: mediaURL, latitude: latitude, longitude: longitude, location: location) { (results, errorString) in
-            
-            guard (errorString == nil) else {
-                let alert = Alerts.errorAlert(title: "Sorry, but we could not successfully post your location", message: errorString)
-                self.present(alert, animated: true, completion: nil)
-                return
+        performUIUpdatesOnMain {
+            guard let userID = self.user?.userId,
+                let firstName = self.user?.firstName,
+                let lastName = self.user?.lastName,
+                let mediaURL = self.link,
+                let location = self.location,
+                let latitude = self.latitude,
+                let longitude = self.longitude
+                else {
+                    let alert = Alerts.errorAlert(title: "Error posting Data!", message: "Could not unwrap properties passed in")
+                    self.present(alert, animated: true, completion: nil)
+                    return
             }
             
-            self.dismiss(animated: true, completion: nil)
+            let _ = Client.sharedInstance().postStudentLocation(userId: userID, firstName: firstName, lastName: lastName, mediaURL: mediaURL, latitude: latitude, longitude: longitude, location: location) { (results, errorString) in
+                
+                guard (errorString == nil) else {
+                    let alert = Alerts.errorAlert(title: "Sorry, but we could not successfully post your location", message: errorString)
+                    self.present(alert, animated: true, completion: nil)
+                    return
+                }
+                
+                self.dismiss(animated: true, completion: nil)
+            }
         }
     }
     
