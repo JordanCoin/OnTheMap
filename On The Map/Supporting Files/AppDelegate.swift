@@ -13,10 +13,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     var user: User?
     var window: UIWindow?
+    let loginSave = UserDefaults.standard
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         
-        // Override point for customization after application launch.
+        let storybaord = UIStoryboard(name: "Main", bundle: nil)
+        
+        if loginSave.string(forKey: "loggedIn") != nil {
+            let vc = storybaord.instantiateViewController(withIdentifier: "StudentMainTabBarController") as? UITabBarController
+            window?.rootViewController = vc
+        } else {
+            let vc = storybaord.instantiateViewController(withIdentifier: "LoginViewController") as? LoginViewController
+            window?.rootViewController = vc
+        }
+        
         return true
     }
 

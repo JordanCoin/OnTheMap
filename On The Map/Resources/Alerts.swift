@@ -9,10 +9,8 @@
 import Foundation
 import UIKit
 
-struct Alerts {
-    static func errorAlert(title: String, message: String?) -> UIAlertController {
-        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "Ok", style: .default, handler: nil))
-        return alert
-    }
+func errorAlert(title: String, message: String, view: UIViewController) {
+    let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+    alert.addAction(UIAlertAction(title: "Ok", style: .default, handler: nil))
+    view.present(alert, animated: true, completion: nil)
 }

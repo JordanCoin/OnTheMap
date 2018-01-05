@@ -11,6 +11,7 @@ import UIKit
 class LocationTableViewController: UITableViewController {
         
     var students = Student()
+    let loginSave = UserDefaults.standard
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -18,11 +19,10 @@ class LocationTableViewController: UITableViewController {
     }
     
     func loadTable() {
-        let _ = Client.sharedInstance().getStudentLocation({ (value, errorString) in
+        let _ = Client.sharedInstance.getStudentLocation({ (value, errorString) in
             
             guard let value = value else {
-                let alert = Alerts.errorAlert(title: "Failed to Reload!", message: "Check your connection, we could not reload the information. \(String(describing: errorString))")
-                self.present(alert, animated: true, completion: nil)
+                errorAlert(title: "Failed to Reload!", message: "Check your connection, we could not reload the information. \(String(describing: errorString))", view: self)
                 return
             }
             
@@ -35,10 +35,12 @@ class LocationTableViewController: UITableViewController {
     }
 
     @IBAction func logoutTouched(_ sender: Any) {
-        Client.sharedInstance().logout({ (success, error) in
+        Client.sharedInstance.logout({ (success, error) in
             if success {
                 DispatchQueue.main.async {
-                    self.dismiss(animated: true, completion: nil)
+                    self.tabBarController?.dismiss(animated: true, completion: nil)
+                    self.loginSave.removeObject(forKey: "loggedIn")
+                    Client.sharedInstance.userKey.removeObject(forKey: "key")
                 }
             }
         })
@@ -76,8 +78,7 @@ class LocationTableViewController: UITableViewController {
         if let url = URL(string: student.mediaURL) {
             UIApplication.shared.open(url, options: [:], completionHandler: nil)
         } else {
-            let alert = Alerts.errorAlert(title: "Unable to load URL", message: "Looks like this is a invalid URL, try another!")
-            present(alert, animated: true, completion: nil)
+            errorAlert(title: "Unable to load URL", message: "Looks like this is a invalid URL, try another!", view: self)
         }
     }
 

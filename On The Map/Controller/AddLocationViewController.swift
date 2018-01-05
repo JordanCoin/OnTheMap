@@ -34,8 +34,7 @@ class AddLocationViewController: UIViewController {
     
     func findLoc() {
         guard let savedlink = linkTextField.text, let location = locationTextField.text else {
-            let alert = Alerts.errorAlert(title: "Link Invalid", message: "Your link is not a valid url")
-            present(alert, animated: true, completion: nil)
+            errorAlert(title: "Link Invalid", message: "Your link is not a valid url", view: self)
             return
         }
         geocode.geocodeAddressString(location, completionHandler: { (placemarks, error) in
@@ -54,8 +53,7 @@ class AddLocationViewController: UIViewController {
         performUIUpdatesOnMain {
             
             if let error = error {
-                let alert = Alerts.errorAlert(title: "Unable to Forward Geocode Address", message: "Unable to Find Location for Address \(error.localizedDescription)")
-                self.present(alert, animated: true, completion: nil)
+                errorAlert(title: "Unable to Forward Geocode Address", message: "Unable to Find Location for Address \(error.localizedDescription)", view: self)
             } else {
                 var location: CLLocation?
                 
@@ -70,8 +68,7 @@ class AddLocationViewController: UIViewController {
                     self.longitude = coordinate.longitude
                     completion(true)
                 } else {
-                    let alert = Alerts.errorAlert(title: "No Matching Location Found", message: "Unable to Find Location for Address")
-                    self.present(alert, animated: true, completion: nil)
+                    errorAlert(title: "No Matching Location Found", message: "Unable to Find Location for Address", view: self)
                 }
             }
         }
@@ -91,8 +88,7 @@ class AddLocationViewController: UIViewController {
         if locationTextField.text != "" && linkTextField.text != "" {
             return true
         } else {
-            let alert = Alerts.errorAlert(title: "Error Finding Location", message: "You need to enter a location and a link to find your location!")
-            present(alert, animated: true, completion: nil)
+            errorAlert(title: "Error Finding Location", message: "You need to enter a location and a link to find your location!", view: self)
             return false
         }
     }

@@ -82,16 +82,14 @@ class CurrentLocationViewController: UIViewController, MKMapViewDelegate {
                 let latitude = self.latitude,
                 let longitude = self.longitude
                 else {
-                    let alert = Alerts.errorAlert(title: "Error posting Data!", message: "Could not unwrap properties passed in")
-                    self.present(alert, animated: true, completion: nil)
+                    errorAlert(title: "Error posting Data!", message: "Could not unwrap properties passed in", view: self)
                     return
             }
             
-            let _ = Client.sharedInstance().postStudentLocation(userId: userID, firstName: firstName, lastName: lastName, mediaURL: mediaURL, latitude: latitude, longitude: longitude, location: location) { (results, errorString) in
+            let _ = Client.sharedInstance.postStudentLocation(userId: userID, firstName: firstName, lastName: lastName, mediaURL: mediaURL, latitude: latitude, longitude: longitude, location: location) { (results, errorString) in
                 
                 guard (errorString == nil) else {
-                    let alert = Alerts.errorAlert(title: "Sorry, but we could not successfully post your location", message: errorString)
-                    self.present(alert, animated: true, completion: nil)
+                    errorAlert(title: "Sorry, but we could not successfully post your location", message: errorString!, view: self)
                     return
                 }
                 

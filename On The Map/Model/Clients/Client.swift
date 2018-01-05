@@ -10,11 +10,11 @@ import Foundation
 import UIKit
 
 class Client: NSObject {
-    
-    public typealias completionHandlerMethod = (AnyObject?, String?) -> Void
-    
+        
     // MARK: Properties
     
+    static let sharedInstance = Client()
+    let userKey = UserDefaults()
     var session = URLSession.shared
     
     // MARK: GET - Student Locations
@@ -63,16 +63,6 @@ class Client: NSObject {
     
     func taskForPOSTMethod(_ requestMethod: String, jsonBody: String, completionHandlerPOST: @escaping (_ result: AnyObject?, _ errorString: String?) -> Void) -> URLSessionDataTask {
         
-        /*
-        DispatchQueue.global(qos: .userInitiated).async { () -> Void in
-            
-            DispatchQueue.main.async(execute: { () -> Void in
-                
-            })
-            
-        }
-        */
-        
         let request = NSMutableURLRequest(url: URL(string: "\(Constants.ParseURL)\(requestMethod)")!)
         request.httpMethod = "POST"
         request.addValue(Constants.AppID, forHTTPHeaderField: "X-Parse-Application-Id")
@@ -111,10 +101,7 @@ class Client: NSObject {
         return task
     }
     
-    // 12/31/17 Edited taskForUdacityGETMethod with DispatchQueue: Waiting for Update
-    // [                              - U P D A T E -                               ]
-    
-    func taskForUdacityGETMethod(_ method: String, completionForUdacityGET: @escaping completionHandlerMethod) -> URLSessionDataTask {
+    func taskForUdacityGETMethod(_ method: String, completionForUdacityGET: @escaping (_ result: AnyObject?, _ errorString: String?) -> Void) -> URLSessionDataTask {
         
         let request = NSMutableURLRequest(url: URL(string: "\(Constants.UdacityURL)\(method)")!)
         
@@ -174,11 +161,23 @@ class Client: NSObject {
             }
             
             // make sure we got a successfull 2xx response from the request
-            guard let httpStatusCode = (response as? HTTPURLResponse)?.statusCode,
-                httpStatusCode >= 200 && httpStatusCode <= 299 else {
-                    sendError(error: "The request did not return a valid 2xx httpStatusCode for the udacity POST request")
-                    return
+            
+            guard let httpStatusCode = (response as? HTTPURLResponse)?.statusCode, httpStatusCode >= 200 && httpStatusCode <= 299 else {
+                sendError(error: "Status code outside 2XX.")
+                return
             }
+            
+//            func statusCode(response: HTTPURLResponse) {
+//                if response.statusCode == 401 {
+//                    sendError(error: "You entered invalid credentials, try again.")
+//                    return
+//                } else if 200...299 ~= response.statusCode {
+//                    sendError(error: "Status code outside 2XX.")
+//                    return
+//                }
+//            }
+//
+//            statusCode(response: httpStatusCode)
             
             // make sure there was actual data returned
             guard let data = data else {
@@ -220,12 +219,4 @@ class Client: NSObject {
         completionHandlerForConvertData(parsedResult, nil)
     }
     
-    // MARK: Shared Instance
-    
-    class func sharedInstance() -> Client {
-        struct Singleton {
-            static var sharedInstance = Client()
-        }
-        return Singleton.sharedInstance
-    }
 }

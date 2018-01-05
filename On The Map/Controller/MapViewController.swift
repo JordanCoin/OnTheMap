@@ -12,7 +12,8 @@ import MapKit
 class MapViewController: UIViewController, MKMapViewDelegate {
 
     var students = Student()
-    
+    let loginSave = UserDefaults.standard
+
     @IBOutlet weak var mapView: MKMapView!
     
     override func viewDidLoad() {
@@ -22,11 +23,10 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     }
 
     func loadLocations() {
-        let _ = Client.sharedInstance().getStudentLocation({ (value, errorString) in
+        let _ = Client.sharedInstance.getStudentLocation({ (value, errorString) in
             
             guard let value = value else {
-                let alert = Alerts.errorAlert(title: "Check your network!",message: "Could not get student information from the server. Please try again! \(String(describing: errorString))")
-                self.present(alert, animated: true, completion: nil)
+                errorAlert(title: "Check your network!",message: "Could not get student information from the server. Please try again! \(String(describing: errorString))", view: self)
                 return
             }
             
@@ -40,12 +40,14 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     }
     
     @IBAction func logoutTouched(_ sender: Any) {
-        Client.sharedInstance().logout({ (success, error) in
+        Client.sharedInstance.logout({ (success, error) in
             if success {
                 DispatchQueue.main.async {
-                    self.dismiss(animated: true, completion: nil)
+                    self.tabBarController?.dismiss(animated: true, completion: nil)
+                    self.loginSave.removeObject(forKey: "loggedIn")
+                    Client.sharedInstance.userKey.removeObject(forKey: "key")
                 }
-            }
+            }            
         })
     }
     

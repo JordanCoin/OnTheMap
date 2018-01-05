@@ -26,14 +26,17 @@ extension Client {
             }
             
             guard let results = results,
-                let result = results[Constants.JSONResponseKeys.Account] as? [String:AnyObject],
-                let sessionID = result[Constants.JSONResponseKeys.AccountKey] as? String
-                else {
+                let result = results[Constants.JSONResponseKeys.Account] as? [String: AnyObject] else {
                     completionForSession(nil, error)
                     return
             }
-            // we know we had a successful request if we get here
-            completionForSession(sessionID, nil)
+            
+            if let sessionID = result[Constants.JSONResponseKeys.AccountKey] as? String {
+                // we know we had a successful request if we get here
+                self.userKey.set(sessionID, forKey: "key")
+                completionForSession(sessionID, nil)
+                return
+            }
         }
     }
     
