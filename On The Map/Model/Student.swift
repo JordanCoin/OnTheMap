@@ -8,6 +8,12 @@
 
 import Foundation
 
+//struct StudentDelegate {
+//    static var sharedInstance = StudentDelegate()
+//    var array = [Student]()
+//    private init() {}
+//}
+
 struct Student {
     
     static var sharedInstance = Student()

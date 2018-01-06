@@ -16,6 +16,7 @@ class AddLocationViewController: UIViewController {
     var longitude: Double? = nil
     var latitude: Double? = nil
     var link: String? = nil
+    let activity = UIActivityIndicatorView(activityIndicatorStyle: .gray)
     
     @IBOutlet weak var findLocButton: BorderedButton!
     @IBOutlet weak var locationTextField: UITextField!
@@ -23,7 +24,17 @@ class AddLocationViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        configureView()
+    }
+    
+    func configureView() {
         configureTextFields([locationTextField, linkTextField])
+        
+        activity.layer.cornerRadius = 10
+        activity.frame = activity.frame.insetBy(dx: -10, dy: -10)
+        activity.center = self.view.center
+        activity.tag = 1001
+        view.addSubview(activity)
     }
     
     @IBAction func findLocationTouched(_ sender: Any) {
@@ -37,11 +48,15 @@ class AddLocationViewController: UIViewController {
             Alerts.errorAlert(title: "Link Invalid", message: "Your link is not a valid url", view: self)
             return
         }
+        
+        activity.startAnimating()
+        
         geocode.geocodeAddressString(location, completionHandler: { (placemarks, error) in
             self.processResponse(withPlacemarks: placemarks, processedLink: savedlink, error: error, { (success) in
                 
-                    if success {
-                        DispatchQueue.main.async {
+                if success {
+                    DispatchQueue.main.async {
+                        self.activity.stopAnimating()
                         self.performSegue(withIdentifier: "presentLocSegue", sender: self)
                     }
                 }
@@ -55,6 +70,7 @@ class AddLocationViewController: UIViewController {
             
             if let error = error {
                 print(error.localizedDescription)
+                self.activity.stopAnimating()
                 Alerts.errorAlert(title: "Unable to Forward Geocode Address", message: "Could not pin your location from the location provided, try again.", view: self)
             } else {
                 var location: CLLocation?
@@ -68,6 +84,7 @@ class AddLocationViewController: UIViewController {
                     self.link = processedLink
                     self.latitude = coordinate.latitude
                     self.longitude = coordinate.longitude
+                    self.activity.stopAnimating()
                     completion(true)
                 }
             }

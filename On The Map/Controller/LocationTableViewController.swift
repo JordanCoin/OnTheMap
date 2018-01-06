@@ -4,7 +4,6 @@
 //
 //  Created by Jordan Jackson on 11/19/17.
 //  Copyright © 2017 Jordan Jackson. All rights reserved.
-//
 
 import UIKit
 
@@ -20,14 +19,13 @@ class LocationTableViewController: UITableViewController {
     func loadTable() {
         let _ = Client.sharedInstance.getStudentLocation({ (value, error) in
             
-            guard let value = value else {
-                Alerts.errorAlert(title: "Failed to Reload!", message: (error?.localizedDescription)!, view: self)
-                return
-            }
-
-            Student.sharedInstance.array.append(value)
-            
             DispatchQueue.main.async {
+                
+                guard error == nil else {
+                    Alerts.errorAlert(title: "Failed to Reload!", message: (error?.localizedDescription)!, view: self)
+                    return
+                }
+
                 self.tableView.reloadData()
             }
         })
@@ -35,6 +33,12 @@ class LocationTableViewController: UITableViewController {
 
     @IBAction func logoutTouched(_ sender: Any) {
         Client.sharedInstance.logout({ (success, error) in
+            
+            guard error == nil else {
+                print("error logging out")
+                print("\(String(describing: error?.localizedDescription))")
+                return
+            }
             
             DispatchQueue.main.async {
                 
@@ -48,6 +52,7 @@ class LocationTableViewController: UITableViewController {
     }
     
     @IBAction func refreshTouched(_ sender: Any) {
+        
         loadTable()
     }
     

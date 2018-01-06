@@ -44,20 +44,17 @@ extension Client {
         let _ = taskForGETMethod(Constants.Methods.ParseStudentLocation) { (results, error) in
             
             // check to see if there was an error returned
-            guard (error == nil) else {
+            if let error = error {
                 completionHandlerForGETStudentLoc(nil, error)
-                return
+            } else {
+                // if there was no error we know we had a successful response
+                if let results = results?[Constants.JSONResponseKeys.Results] as? [[String:AnyObject]] {
+                    let students = Student.studentsFromResults(results: results)
+                    completionHandlerForGETStudentLoc(students, nil)
+                } else {
+                   completionHandlerForGETStudentLoc(nil, NSError(domain: "getStudentLocation parsing", code: 0, userInfo: [NSLocalizedDescriptionKey: "Could not parse getStudentLocationData"]))
+                }
             }
-            
-            guard let results = results?[Constants.JSONResponseKeys.Results] as? [[String:AnyObject]] else {
-                completionHandlerForGETStudentLoc(nil, NSError(domain: "getStudentLocation parsing", code: 0, userInfo: [NSLocalizedDescriptionKey: "Could not parse getStudentLocationData"]))
-                return
-            }
-            
-            // if there was no error we know we had a successful response
-            let students = Student.studentsFromResults(results: results)
-            
-            completionHandlerForGETStudentLoc(students, nil)
         }
     }
     
@@ -90,7 +87,7 @@ extension Client {
     }
     
     // MARK: - POST Student Location Method
-    func postStudentLocation(userId: String, firstName: String, lastName: String, mediaURL: String, latitude: CLLocationDegrees, longitude: CLLocationDegrees, location: String, completionHandlerForPOSTStudentLoc: @escaping (_ result: Int?, _ errorString: String?) -> Void) {
+    func postStudentLocation(userId: String, firstName: String, lastName: String, mediaURL: String, latitude: CLLocationDegrees, longitude: CLLocationDegrees, location: String, completionHandlerForPOSTStudentLoc: @escaping (_ result: AnyObject?, _ errorString: String?) -> Void) {
         
         // create the jsonBody for the request and define the method to be used
         let jsonBody = "{\"\(Constants.JSONBodyKeys.UniqueKey)\": \"\(userId)\", \"\(Constants.JSONBodyKeys.FirstName)\": \"\(firstName)\", \"\(Constants.JSONBodyKeys.LastName)\": \"\(lastName)\",\"\(Constants.JSONBodyKeys.MapString)\": \"\(location)\", \"\(Constants.JSONBodyKeys.MediaURL)\": \"\(mediaURL)\",\"\(Constants.JSONBodyKeys.Latitude)\": \(latitude), \"\(Constants.JSONBodyKeys.Longitude)\": \(longitude)}"
@@ -104,7 +101,7 @@ extension Client {
             }
             
             // if there was no error we know we had a successful response
-            completionHandlerForPOSTStudentLoc(1, nil)
+            completionHandlerForPOSTStudentLoc(result, nil)
         }
     }
    

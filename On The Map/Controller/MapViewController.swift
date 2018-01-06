@@ -27,13 +27,11 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         
         let _ = Client.sharedInstance.getStudentLocation({ (value, error) in
             
-            guard let value = value else {
+            guard error == nil else {
                 Alerts.errorAlert(title: "Failed to Reload!", message: (error?.localizedDescription)!, view: self)
                 return
             }
-            
-            Student.sharedInstance.array.append(value)
-            
+                        
             performUIUpdatesOnMain({
                 self.mapView.addAnnotations(self.pinLocations())
                 self.mapView.reloadInputViews()
@@ -44,6 +42,12 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     @IBAction func logoutTouched(_ sender: Any) {
         Client.sharedInstance.logout({ (success, error) in
             
+            guard error == nil else {
+                print("error logging out")
+                print("\(String(describing: error?.localizedDescription))")
+                return
+            }
+
             DispatchQueue.main.async {
                 
                 if success {

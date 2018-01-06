@@ -23,6 +23,7 @@ class CurrentLocationViewController: UIViewController, MKMapViewDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         mapView.delegate = self
+        setRegion()
         mapView.addAnnotation(pinLocation())
     }
     
@@ -32,6 +33,14 @@ class CurrentLocationViewController: UIViewController, MKMapViewDelegate {
         self.link = mediaURL
         self.longitude = longitude
         self.latitude = latitude
+    }
+    
+    func setRegion() {
+        let latitudeDelta = 0.05
+        let longitudeDelta = 0.05
+        let span = MKCoordinateSpanMake(latitudeDelta, longitudeDelta)
+        let region = MKCoordinateRegionMake(pinLocation().coordinate, span)
+        mapView.setRegion(region, animated: true)
     }
     
     func pinLocation() -> MKAnnotation {
@@ -89,12 +98,15 @@ class CurrentLocationViewController: UIViewController, MKMapViewDelegate {
             let _ = Client.sharedInstance.postStudentLocation(userId: userID, firstName: firstName, lastName: lastName, mediaURL: mediaURL, latitude: latitude, longitude: longitude, location: location) { (results, errorString) in
                 
                 DispatchQueue.main.async {
+                    
                     guard (errorString == nil) else {
                         Alerts.errorAlert(title: "Sorry, we weren't able to post your location", message: errorString!, view: self)
                         return
                     }
                     
-                    self.dismiss(animated: true, completion: nil)
+                    if let _ = results {
+                        self.dismiss(animated: true, completion: nil)
+                    }
                 }
             }
         }
