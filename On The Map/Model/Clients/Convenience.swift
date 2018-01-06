@@ -12,7 +12,7 @@ import MapKit
 
 extension Client {
     
-    // MARK: Udacity Authentication (POST) Method
+    // MARK: Udacity Login Authentication (POST) Method
     
     func getSessionID(_ username: String, _ password: String, _ completionForSession: @escaping (_ sessionID: String?, _ errorString: String?) -> Void) {
         
@@ -20,14 +20,9 @@ extension Client {
 
         let _ = taskForUdacityPOST(Constants.Methods.UdacitySession, jsonBody: jsonBody) { (results, error) in
             
-            guard (error == nil) else {
-                completionForSession(nil, error)
-                return
-            }
-            
             guard let results = results,
                 let result = results[Constants.JSONResponseKeys.Account] as? [String: AnyObject] else {
-                    completionForSession(nil, error)
+                    completionForSession(nil, error?.localizedDescription)
                     return
             }
             
@@ -36,12 +31,15 @@ extension Client {
                 self.userKey.set(sessionID, forKey: "key")
                 completionForSession(sessionID, nil)
                 return
+            } else {
+                completionForSession(nil, error?.localizedDescription)
+
             }
         }
     }
     
-    // MARK: - POST Student Location Method
-    func getStudentLocation(_ completionHandlerForGETStudentLoc: @escaping (_ result: Student?, _ errorString: String?) -> Void) {
+    // MARK: - GET Student Location Method
+    func getStudentLocation(_ completionHandlerForGETStudentLoc: @escaping (_ result: Student?, _ error: NSError?) -> Void) {
         
         let _ = taskForGETMethod(Constants.Methods.ParseStudentLocation) { (results, error) in
             
@@ -52,7 +50,7 @@ extension Client {
             }
             
             guard let results = results?[Constants.JSONResponseKeys.Results] as? [[String:AnyObject]] else {
-                completionHandlerForGETStudentLoc(nil, error)
+                completionHandlerForGETStudentLoc(nil, NSError(domain: "getStudentLocation parsing", code: 0, userInfo: [NSLocalizedDescriptionKey: "Could not parse getStudentLocationData"]))
                 return
             }
             
@@ -71,7 +69,7 @@ extension Client {
                 
                 // check to see if there was an error returned
                 guard error == nil else {
-                    completionHandlerGETUserInfo(nil, error)
+                    completionHandlerGETUserInfo(nil, Alerts.ResponseError.Unauthorized.localizedDescription)
                     return
                 }
                 
@@ -80,7 +78,7 @@ extension Client {
                     let firstName = userInfo[Constants.JSONResponseKeys.UdacityFirstName] as? String,
                     let lastName = userInfo[Constants.JSONResponseKeys.UdacityLastName] as? String
                     else {
-                        completionHandlerGETUserInfo(nil, error)
+                        completionHandlerGETUserInfo(nil, Alerts.ResponseError.Unknown.localizedDescription)
                         return
                 }
                 
@@ -101,7 +99,7 @@ extension Client {
             
             // check to see if there was an error returned
             guard (error == nil) else {
-                completionHandlerForPOSTStudentLoc(nil, error)
+                completionHandlerForPOSTStudentLoc(nil, error?.localizedDescription)
                 return
             }
             
@@ -112,7 +110,7 @@ extension Client {
    
     // MARK: Udacity Authentication (DELETE) Method
     
-    func logout(_ completionHandlerForSession: @escaping (_ success: Bool, _ errorString: String?) -> Void) {
+    func logout(_ completionHandlerForSession: @escaping (_ success: Bool, _ error: NSError?) -> Void) {
         
         var request = URLRequest(url: URL(string: "https://www.udacity.com/api/session")!)
         request.httpMethod = "DELETE"
@@ -128,38 +126,25 @@ extension Client {
         
         let task = session.dataTask(with: request) { data, response, error in
             
+            func sendError(_ error: String) {
+                let userInfo = [NSLocalizedDescriptionKey : error]
+                completionHandlerForSession(false, NSError(domain: "taskForGETMethod", code: 1, userInfo: userInfo))
+            }
+            
             guard (error == nil) else {
-                completionHandlerForSession(false, "logout Error")
+                sendError("error with logging out")
+                completionHandlerForSession(false, error as NSError?)
                 return
             }
             
             guard let statusCode = (response as? HTTPURLResponse)?.statusCode, statusCode >= 200 && statusCode <= 299 else {
-                completionHandlerForSession(false, "Your request returned a status code other than 2xx!")
+                completionHandlerForSession(false, Alerts.ResponseError.Unknown as NSError?)
                 return
             }
             
-            let range = Range(5..<data!.count)
-            guard let newData = data?.subdata(in: range) else {
-                completionHandlerForSession(false, "No data was returned by the request!")
-                return
-            }
-            
-            do {
-                let parsedData = try JSONSerialization.jsonObject(with: newData, options: .allowFragments) as! [String : Any]
-                
-                guard let results = parsedData[Constants.JSONResponseKeys.Session] as? [String: Any] else { return }
-                
-                for id in results {
-                    if id.key == Constants.JSONResponseKeys.SessionId {
-                        completionHandlerForSession(true, nil)
-                    }
-                }
-            } catch {
-                completionHandlerForSession(false, "No Session avaliable")
-                return
-            }
+            completionHandlerForSession(true, nil)
         }
         task.resume()
-        
     }
+    
 }

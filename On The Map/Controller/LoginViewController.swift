@@ -11,7 +11,7 @@ import UIKit
 class LoginViewController: UIViewController {
     
     let appDelegate = UIApplication.shared.delegate as! AppDelegate
-    let loginSave = UserDefaults.standard
+    let saveLogin = UserDefaults.standard
 
     @IBOutlet weak var loginButton: BorderedButton!
     @IBOutlet weak var emailTextField: UITextField!
@@ -45,15 +45,15 @@ class LoginViewController: UIViewController {
                     
                     performUIUpdatesOnMain({
                         
-                    guard (error == nil) else {
-                        errorAlert(title: "Error logging in", message: error!, view: self)
-                        return
-                    }
-                    
-                    guard let userID = sessionID else {
-                        errorAlert(title: "Error logging in", message: error!, view: self)
-                        return
-                    }
+                        guard (error == nil) else {
+                            Alerts.errorAlert(title: "Error logging in", message: error!, view: self)
+                            return
+                        }
+                        
+                        guard let userID = sessionID else {
+                            Alerts.errorAlert(title: "Error logging in", message: error!, view: self)
+                            return
+                        }
                         self.completeLogin(userID: userID)
                     })
                 }
@@ -64,20 +64,24 @@ class LoginViewController: UIViewController {
     func completeLogin(userID: String) {
         Client.sharedInstance.getUdacityUserInfo(userID: userID) { (result, error) in
             
-            guard (error == nil) else {
-                errorAlert(title: "Error logging in", message: error!, view: self)
-                return
-            }
+            performUIUpdatesOnMain({
+                
+                guard (error == nil) else {
+                    Alerts.errorAlert(title: "Error logging in", message: error!, view: self)
+                    return
+                }
+                
+                guard let user = result else {
+                    Alerts.errorAlert(title: "Error logging in", message: "Could not retrieve the custom USER struct from the Udacity users API", view: self)
+                    return
+                }
+                
+                // save the user show the main nav bar, save the login with userdefault
+                self.appDelegate.user = user
+                self.showMainTabController()
+                self.saveLogin.set(true, forKey: "loggedIn")
+            })
             
-            guard let user = result else {
-                errorAlert(title: "Error logging in", message: "Could not retrieve the custom USER struct from the Udacity users API", view: self)
-                return
-            }
-            // save the user and show the main nav bar controller
-
-            self.appDelegate.user = user
-            self.showMainTabController()
-            self.loginSave.set(true, forKey: "loggedIn")
         }
     }
     
@@ -90,7 +94,7 @@ class LoginViewController: UIViewController {
         if emailTextField.text != "" && passwordTextField.text != "" {
             return true
         } else {
-            errorAlert(title: "Error logging in", message: "Your login information is invalid.", view: self)
+            Alerts.errorAlert(title: "Error logging in", message: "Your login information is invalid.", view: self)
             return false
         }
     }

@@ -19,7 +19,7 @@ class Client: NSObject {
     
     // MARK: GET - Student Locations
 
-    func taskForGETMethod(_ requestMethod: String, completionHandlerGET: @escaping (_ result: AnyObject?, _ errorString: String?) -> Void) -> URLSessionDataTask {
+    func taskForGETMethod(_ requestMethod: String, completionHandlerGET: @escaping (_ result: AnyObject?, _ error: NSError?) -> Void) -> URLSessionDataTask {
         
         let url = "\(Constants.ParseURL)\(requestMethod)?\(Constants.ParameterKeys.Limit)=100&\(Constants.ParameterKeys.Order)=-\(Constants.ParameterKeys.UpdatedAt)"
         
@@ -30,18 +30,24 @@ class Client: NSObject {
         let task = session.dataTask(with: request as URLRequest) { data, response, error in
             
             func sendError(error: String) {
-                completionHandlerGET(nil, error)
+                let userInfo = [NSLocalizedDescriptionKey: error]
+                completionHandlerGET(nil, NSError(domain: "taskForGETMethod", code: 1, userInfo: userInfo))
             }
             
             /* GUARD: Was there an error? */
             guard (error == nil) else {
-                sendError(error: "There was an error with the GET request \(error!)")
+                sendError(error: Alerts.ResponseError.Unknown.localizedDescription)
                 return
             }
             
-            /* GUARD: Did we get a successful 2XX response? */
-            guard let statusCode = (response as? HTTPURLResponse)?.statusCode, statusCode >= 200 && statusCode <= 299 else {
-                sendError(error: "Your request returned a status code other than 2xx!")
+            // make sure we got a successfull 2xx response from the request
+            guard let httpStatusCode = (response as? HTTPURLResponse)?.statusCode, httpStatusCode != 403 else {
+                sendError(error: Alerts.ResponseError.Unauthorized.localizedDescription)
+                return
+            }
+            
+            guard httpStatusCode >= 200 && httpStatusCode <= 299 else {
+                sendError(error: Alerts.ResponseError.Unknown.localizedDescription)
                 return
             }
             
@@ -61,7 +67,7 @@ class Client: NSObject {
     
     // MARK: POST - Create a new student location
     
-    func taskForPOSTMethod(_ requestMethod: String, jsonBody: String, completionHandlerPOST: @escaping (_ result: AnyObject?, _ errorString: String?) -> Void) -> URLSessionDataTask {
+    func taskForPOSTMethod(_ requestMethod: String, jsonBody: String, completionHandlerPOST: @escaping (_ result: AnyObject?, _ error: NSError?) -> Void) -> URLSessionDataTask {
         
         let request = NSMutableURLRequest(url: URL(string: "\(Constants.ParseURL)\(requestMethod)")!)
         request.httpMethod = "POST"
@@ -73,18 +79,24 @@ class Client: NSObject {
         let task = session.dataTask(with: request as URLRequest) { data, response, error in
             
             func sendError(error: String) {
-                completionHandlerPOST(nil, error)
+                let userInfo = [NSLocalizedDescriptionKey: error]
+                completionHandlerPOST(nil, NSError(domain: "taskForPOSTMethod", code: 1, userInfo: userInfo))
             }
             
             /* GUARD: Was there an error? */
             guard (error == nil) else {
-                sendError(error: "There was an error with your POST request \(error!)")
+                sendError(error: Alerts.ResponseError.Unknown.localizedDescription)
                 return
             }
             
-            /* GUARD: Did we get a successful 2XX response? */
-            guard let statusCode = (response as? HTTPURLResponse)?.statusCode, statusCode >= 200 && statusCode <= 299 else {
-                sendError(error: "The request did not return a valid 2xx httpStatusCode for the POST")
+            // make sure we got a successfull 2xx response from the request
+            guard let httpStatusCode = (response as? HTTPURLResponse)?.statusCode, httpStatusCode != 403 else {
+                sendError(error: Alerts.ResponseError.Unauthorized.localizedDescription)
+                return
+            }
+            
+            guard httpStatusCode >= 200 && httpStatusCode <= 299 else {
+                sendError(error: Alerts.ResponseError.Unknown.localizedDescription)
                 return
             }
             
@@ -101,46 +113,47 @@ class Client: NSObject {
         return task
     }
     
-    func taskForUdacityGETMethod(_ method: String, completionForUdacityGET: @escaping (_ result: AnyObject?, _ errorString: String?) -> Void) -> URLSessionDataTask {
+    func taskForUdacityGETMethod(_ method: String, completionHandlerForGET: @escaping (_ result: AnyObject?, _ error: NSError?) -> Void) -> URLSessionDataTask {
         
         let request = NSMutableURLRequest(url: URL(string: "\(Constants.UdacityURL)\(method)")!)
         
         let task = self.session.dataTask(with: request as URLRequest) { (data, response, error) in
             
-            func sendError(error: String) {
-                completionForUdacityGET(nil, error)
+            func sendError(_ error: String) {
+                let userInfo = [NSLocalizedDescriptionKey: error]
+                completionHandlerForGET(nil, NSError(domain: "taskForUdacityGETMethod", code: 1, userInfo: userInfo))
             }
             
             // was there an error returned in the response
             guard (error == nil) else {
-                sendError(error: "There was an error with the UDACITY GET request \(error!)")
+                sendError(Alerts.ResponseError.Unknown.localizedDescription)
                 return
             }
             
             // make sure we got a successfull 2xx response from the request
             guard let httpStatusCode = (response as? HTTPURLResponse)?.statusCode,
                 httpStatusCode >= 200 && httpStatusCode <= 299 else {
-                    sendError(error: "The request did not return a valid 2xx httpStatusCode for the udacity GET request")
+                    sendError(Alerts.ResponseError.Unknown.localizedDescription)
                     return
             }
             
             // make sure there was actual data returned
             guard let data = data else {
-                sendError(error: "There was no data returned in the UDACITY GET request")
+                sendError("There was no data returned in the UDACITY GET request")
                 return
             }
             
             let range = Range(5..<data.count)
             let newData = data.subdata(in: range)
             
-            self.convertDataWithCompletionHandler(data: newData, completionHandlerForConvertData: completionForUdacityGET)
+            self.convertDataWithCompletionHandler(data: newData, completionHandlerForConvertData: completionHandlerForGET)
             
         }
         task.resume()
         return task
     }
     
-    func taskForUdacityPOST(_ requestMethod: String, jsonBody: String, completionHandlerForPOST: @escaping (_ result: AnyObject?, _ stringError: String?) -> Void) -> URLSessionDataTask {
+    func taskForUdacityPOST(_ requestMethod: String, jsonBody: String, completionHandlerForPOST: @escaping (_ result: AnyObject?, _ error: NSError?) -> Void) -> URLSessionDataTask {
         
         let request = NSMutableURLRequest(url: URL(string: "\(Constants.UdacityURL)\(requestMethod)")!)
         request.httpMethod = "POST"
@@ -151,33 +164,28 @@ class Client: NSObject {
         let task = session.dataTask(with: request as URLRequest) { (data, response, error) in
             
             func sendError(error: String) {
-                completionHandlerForPOST(nil, error)
+                let userInfo = [NSLocalizedDescriptionKey: error]
+                completionHandlerForPOST(nil, NSError(domain: "taskForUdacityPOSTMethod", code: 1, userInfo: userInfo))
             }
             
             // was there an error returned in the response
             guard (error == nil) else {
-                sendError(error: "\(error!.localizedDescription)")
+                sendError(error: Alerts.ResponseError.Unknown.localizedDescription)
                 return
             }
             
             // make sure we got a successfull 2xx response from the request
-            
-            guard let httpStatusCode = (response as? HTTPURLResponse)?.statusCode, httpStatusCode >= 200 && httpStatusCode <= 299 else {
-                sendError(error: "Status code outside 2XX.")
+            guard let httpStatusCode = (response as? HTTPURLResponse)?.statusCode, httpStatusCode != 403 else {
+                print("Error udacity post statusCode != 403")
+                sendError(error: Alerts.ResponseError.Unauthorized.localizedDescription)
                 return
             }
             
-//            func statusCode(response: HTTPURLResponse) {
-//                if response.statusCode == 401 {
-//                    sendError(error: "You entered invalid credentials, try again.")
-//                    return
-//                } else if 200...299 ~= response.statusCode {
-//                    sendError(error: "Status code outside 2XX.")
-//                    return
-//                }
-//            }
-//
-//            statusCode(response: httpStatusCode)
+            guard httpStatusCode >= 200 && httpStatusCode <= 299 else {
+                sendError(error: Alerts.ResponseError.Unauthorized.localizedDescription)
+                print("Error udacity post statusCode == 200...299")
+                return
+            }
             
             // make sure there was actual data returned
             guard let data = data else {
@@ -193,7 +201,6 @@ class Client: NSObject {
         
         // start the request
         task.resume()
-        
         return task
     }
     
@@ -207,13 +214,14 @@ class Client: NSObject {
     }
     
     // method that takes in raw json and returns it in a usuable foundation object
-    func convertDataWithCompletionHandler(data: Data, completionHandlerForConvertData: (_ result: AnyObject?, _ errorString: String?) -> Void) {
+    func convertDataWithCompletionHandler(data: Data, completionHandlerForConvertData: (_ result: AnyObject?, _ error: NSError?) -> Void) {
         
         var parsedResult: AnyObject! = nil
         do {
             parsedResult = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as AnyObject
         } catch {
-            completionHandlerForConvertData(nil, error.localizedDescription)
+            let userInfo = [NSLocalizedDescriptionKey : "Could not parse the data as JSON: '\(data)'"]
+            completionHandlerForConvertData(nil, NSError(domain: "convertDataWithCompletionHandler", code: 1, userInfo: userInfo))
         }
         
         completionHandlerForConvertData(parsedResult, nil)

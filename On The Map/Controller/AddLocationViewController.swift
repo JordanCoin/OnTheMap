@@ -34,13 +34,14 @@ class AddLocationViewController: UIViewController {
     
     func findLoc() {
         guard let savedlink = linkTextField.text, let location = locationTextField.text else {
-            errorAlert(title: "Link Invalid", message: "Your link is not a valid url", view: self)
+            Alerts.errorAlert(title: "Link Invalid", message: "Your link is not a valid url", view: self)
             return
         }
         geocode.geocodeAddressString(location, completionHandler: { (placemarks, error) in
             self.processResponse(withPlacemarks: placemarks, processedLink: savedlink, error: error, { (success) in
-                if success {
-                    DispatchQueue.main.async {
+                
+                    if success {
+                        DispatchQueue.main.async {
                         self.performSegue(withIdentifier: "presentLocSegue", sender: self)
                     }
                 }
@@ -53,7 +54,8 @@ class AddLocationViewController: UIViewController {
         performUIUpdatesOnMain {
             
             if let error = error {
-                errorAlert(title: "Unable to Forward Geocode Address", message: "Unable to Find Location for Address \(error.localizedDescription)", view: self)
+                print(error.localizedDescription)
+                Alerts.errorAlert(title: "Unable to Forward Geocode Address", message: "Could not pin your location from the location provided, try again.", view: self)
             } else {
                 var location: CLLocation?
                 
@@ -67,8 +69,6 @@ class AddLocationViewController: UIViewController {
                     self.latitude = coordinate.latitude
                     self.longitude = coordinate.longitude
                     completion(true)
-                } else {
-                    errorAlert(title: "No Matching Location Found", message: "Unable to Find Location for Address", view: self)
                 }
             }
         }
@@ -88,7 +88,7 @@ class AddLocationViewController: UIViewController {
         if locationTextField.text != "" && linkTextField.text != "" {
             return true
         } else {
-            errorAlert(title: "Error Finding Location", message: "You need to enter a location and a link to find your location!", view: self)
+            Alerts.errorAlert(title: "Error Finding Location", message: "You need to enter a location and a link to find your location!", view: self)
             return false
         }
     }

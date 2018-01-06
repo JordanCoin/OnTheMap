@@ -13,13 +13,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     var user: User?
     var window: UIWindow?
-    let loginSave = UserDefaults.standard
+    let saveLogin = UserDefaults.standard
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         
+        // If the UserDefault key "loggedIn" is not nil we can skip the login view and go right to the
+        // Main tab bar. If not, we go to the login controller.
+        
         let storybaord = UIStoryboard(name: "Main", bundle: nil)
         
-        if loginSave.string(forKey: "loggedIn") != nil {
+        if saveLogin.string(forKey: "loggedIn") != nil {
             let vc = storybaord.instantiateViewController(withIdentifier: "StudentMainTabBarController") as? UITabBarController
             window?.rootViewController = vc
         } else {

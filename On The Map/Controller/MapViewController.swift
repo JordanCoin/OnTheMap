@@ -11,8 +11,7 @@ import MapKit
 
 class MapViewController: UIViewController, MKMapViewDelegate {
 
-    var students = Student()
-    let loginSave = UserDefaults.standard
+    let saveLogin = UserDefaults.standard
 
     @IBOutlet weak var mapView: MKMapView!
     
@@ -23,14 +22,17 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     }
 
     func loadLocations() {
-        let _ = Client.sharedInstance.getStudentLocation({ (value, errorString) in
+        
+        mapView.removeAnnotations(mapView.annotations)
+        
+        let _ = Client.sharedInstance.getStudentLocation({ (value, error) in
             
             guard let value = value else {
-                errorAlert(title: "Check your network!",message: "Could not get student information from the server. Please try again! \(String(describing: errorString))", view: self)
+                Alerts.errorAlert(title: "Failed to Reload!", message: (error?.localizedDescription)!, view: self)
                 return
             }
             
-            self.students = value
+            Student.sharedInstance.array.append(value)
             
             performUIUpdatesOnMain({
                 self.mapView.addAnnotations(self.pinLocations())
@@ -41,13 +43,15 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     
     @IBAction func logoutTouched(_ sender: Any) {
         Client.sharedInstance.logout({ (success, error) in
-            if success {
-                DispatchQueue.main.async {
+            
+            DispatchQueue.main.async {
+                
+                if success {
                     self.tabBarController?.dismiss(animated: true, completion: nil)
-                    self.loginSave.removeObject(forKey: "loggedIn")
+                    self.saveLogin.removeObject(forKey: "loggedIn")
                     Client.sharedInstance.userKey.removeObject(forKey: "key")
                 }
-            }            
+            }
         })
     }
     
@@ -68,7 +72,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         var annotations = [MKPointAnnotation]()
         
         // Go through our StudentLocation array and create the pins
-        for student in students.array {
+        for student in Student.sharedInstance.array {
 
             let lat = CLLocationDegrees(student.latitude)
             let long = CLLocationDegrees(student.longitude)

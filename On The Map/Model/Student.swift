@@ -10,6 +10,8 @@ import Foundation
 
 struct Student {
     
+    static var sharedInstance = Student()
+    
     let objectId: String
     let uniqueKey: String
     let firstName: String
@@ -34,6 +36,7 @@ struct Student {
     init?(dictionary: [String:AnyObject]) {
         
         guard let objectId = dictionary[Constants.JSONResponseKeys.ObjectId] as? String,
+            let uniqueKey = dictionary[Constants.JSONResponseKeys.UniqueKey] as? String,
             let firstName = dictionary[Constants.JSONResponseKeys.FirstName] as? String,
             let lastName = dictionary[Constants.JSONResponseKeys.LastName] as? String,
             let location = dictionary[Constants.JSONResponseKeys.MapString] as? String,
@@ -44,9 +47,7 @@ struct Student {
                 print("Uable to parse student dictionary. Check json input or parsing method")
                 return nil
         }
-        
-        let uniqueKey = dictionary[Constants.JSONResponseKeys.UniqueKey] as? String ?? "jwilliamcj29@gmail.com"
-        
+
         self.objectId = objectId
         self.uniqueKey = uniqueKey
         self.firstName = firstName
@@ -59,14 +60,11 @@ struct Student {
     
     static func studentsFromResults(results: [[String:AnyObject]]) -> Student {
         
-        var students = Student()
-        
         for result in results {
             if let student = Student(dictionary: result) {
-                students.array.append(student)
+                Student.sharedInstance.array.append(student)
             }
         }
-        
-        return students
+        return Student.sharedInstance
     }
 }
