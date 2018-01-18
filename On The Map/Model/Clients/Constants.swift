@@ -21,7 +21,7 @@ struct Constants {
         static let UdacitySession = "/session"
         static let UdacityPublicUserData = "/users/{user_id}"
         static let ParseStudentLocation = "/StudentLocation"
-        static let ParseGETStudentLocation = "StudentLocation?where=%7B%22uniqueKey%22%3A%221234%22%7D"
+        static let ParseGETStudentLocation = "StudentLocation?where=%7B%22uniqueKey%22%3A%22{1234}%22%7D"
         static let ParsePutStudentLocation = "/StudentLocation/{objectId}"
     }
     

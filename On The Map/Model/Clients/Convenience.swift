@@ -14,10 +14,10 @@ extension Client {
     
     // MARK: Udacity Login Authentication (POST) Method
     
-    func getSessionID(_ username: String, _ password: String, _ completionForSession: @escaping (_ sessionID: String?, _ errorString: String?) -> Void) {
+    func getUserId(_ username: String, _ password: String, _ completionForSession: @escaping (_ userId: String?, _ errorString: String?) -> Void) {
         
         let jsonBody = "{\"\(Constants.JSONBodyKeys.Udacity)\": {\"\(Constants.JSONBodyKeys.Username)\": \"\(username)\", \"\(Constants.JSONBodyKeys.Password)\": \"\(password)\"}}"
-
+        
         let _ = taskForUdacityPOST(Constants.Methods.UdacitySession, jsonBody: jsonBody) { (results, error) in
             
             guard let results = results,
@@ -26,61 +26,21 @@ extension Client {
                     return
             }
             
-            if let sessionID = result[Constants.JSONResponseKeys.AccountKey] as? String {
+            if let userId = result[Constants.JSONResponseKeys.AccountKey] as? String {
                 // we know we had a successful request if we get here
-                self.userKey.set(sessionID, forKey: "key")
-                completionForSession(sessionID, nil)
+                self.userKey.set(userId, forKey: "key")
+                completionForSession(userId, nil)
                 return
-            }
-            
-            
-            else {
-                completionForSession(nil, error?.localizedDescription)
-
-            }
-        }
-    }
-    
-    func updateStudentLocation(_ objectId: String, _ completionHandlerForPUTStudentLoc: @escaping (_ success: Bool, _ error: NSError?) -> Void) {
-        
-        if let method = substituteKeyInMethod(Constants.Methods.ParsePutStudentLocation, key: "objectId", value: objectId) {
-            
-            let _ = taskForPUTMethod(method) { (results, error) in
-                
-                if let error = error {
-                    completionHandlerForPUTStudentLoc(false, error)
-                }
-                guard let results = results?[Constants.JSONResponseKeys.Results] as? [[String: AnyObject]] else { return }
-                
-                DispatchQueue.main.async {
-                    completionHandlerForPUTStudentLoc(true, nil)
-                }
-            }
-        }
-    }
-    
-    
-    // MARK: - GET Student Location Method
-    func getStudentLocation(_ completionHandlerForGETStudentLoc: @escaping (_ results: [[String: AnyObject]]?, _ error: NSError?) -> Void) {
-        
-        let _ = taskForGETMethod(Constants.Methods.ParseStudentLocation) { (results, error) in
-            
-            // check to see if there was an error returned
-            if let error = error {
-                completionHandlerForGETStudentLoc(nil, error)
             } else {
-                
-                // if there was no error we know we had a successful response
-                guard let result = results?[Constants.JSONResponseKeys.Results] as? [[String: AnyObject]] else { return }
-                
-                completionHandlerForGETStudentLoc(result, nil)
+                completionForSession(nil, error?.localizedDescription)
             }
         }
     }
     
-    func getUdacityUserInfo(userID: String, completionHandlerGETUserInfo: @escaping (_ result: User?, _ errorString: String?) -> Void) {
+    // MARK: Udacity GET User Info Method
+    func getUdacityUserInfo(userId: String, completionHandlerGETUserInfo: @escaping (_ result: User?, _ errorString: String?) -> Void) {
         
-        if let method = substituteKeyInMethod(Constants.Methods.UdacityPublicUserData, key: "user_id", value: userID) {
+        if let method = substituteKeyInMethod(Constants.Methods.UdacityPublicUserData, key: "user_id", value: userId) {
             
             let _ = taskForUdacityGETMethod(method) { (results, error) in
                 
@@ -101,9 +61,27 @@ extension Client {
                 
                 DispatchQueue.main.async {
                     // create a User object to be passed back via the completionHandler
-                    let user = User(firstName: firstName, lastName: lastName, userId: userID)
+                    let user = User(firstName: firstName, lastName: lastName, userId: userId)
                     completionHandlerGETUserInfo(user, nil)
                 }
+            }
+        }
+    }
+    
+    // MARK: - GET Student Location Method
+    func getStudentLocation(_ completionHandlerForGETStudentLoc: @escaping (_ results: [[String: AnyObject]]?, _ error: NSError?) -> Void) {
+        
+        let _ = taskForGETMethod(Constants.Methods.ParseStudentLocation) { (results, error) in
+            
+            // check to see if there was an error returned
+            if let error = error {
+                completionHandlerForGETStudentLoc(nil, error)
+            } else {
+                
+                // if there was no error we know we had a successful response
+                guard let result = results?[Constants.JSONResponseKeys.Results] as? [[String: AnyObject]] else { return }
+                
+                completionHandlerForGETStudentLoc(result, nil)
             }
         }
     }
@@ -126,7 +104,6 @@ extension Client {
     }
    
     // MARK: Udacity Authentication (DELETE) Method
-    
     func logout(_ completionHandlerForSession: @escaping (_ result: Int?, _ error: NSError?) -> Void) {
         
         let _ = taskForUdacityDELETESession(Constants.Methods.UdacitySession) { (results, error)

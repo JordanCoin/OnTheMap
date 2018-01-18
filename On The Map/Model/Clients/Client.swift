@@ -114,61 +114,6 @@ class Client: NSObject {
         return task
     }
     
-    func taskForPUTMethod(_ requestMethod: String, completionHandlerGET: @escaping (_ result: AnyObject?, _ error: NSError?) -> Void) -> URLSessionDataTask {
-        
-        let url = "\(Constants.ParseURL)\(requestMethod)"
-        
-        let request = NSMutableURLRequest(url: URL(string: url)!)
-        request.httpMethod = "PUT"
-        request.addValue(Constants.AppID, forHTTPHeaderField: "X-Parse-Application-Id")
-        request.addValue(Constants.ApiKey, forHTTPHeaderField: "X-Parse-REST-API-Key")
-        
-        let task = session.dataTask(with: request as URLRequest) { data, response, error in
-            
-            func sendError(error: String) {
-                let userInfo = [NSLocalizedDescriptionKey: error]
-                completionHandlerGET(nil, NSError(domain: "taskForPUTMethod", code: 1, userInfo: userInfo))
-            }
-            
-            /* GUARD: Was there an error? */
-            guard (error == nil) else {
-                sendError(error: Alerts.ResponseError.Unknown.localizedDescription)
-                return
-            }
-            
-            // make sure we got a successfull 2xx response from the request
-            guard let httpStatusCode = (response as? HTTPURLResponse)?.statusCode, httpStatusCode != 403 else {
-                sendError(error: Alerts.ResponseError.Unauthorized.localizedDescription)
-                return
-            }
-            
-            guard httpStatusCode >= 200 && httpStatusCode <= 299 else {
-                sendError(error: Alerts.ResponseError.Unknown.localizedDescription)
-                return
-            }
-            
-            /* GUARD: Was there any data returned? */
-            guard let data = data else {
-                sendError(error: "No data was returned by the request!")
-                return
-            }
-            
-            do {
-                let jsonStr = try String(data: data, encoding: .utf8)
-                print("Parsed JSON: '\(jsonStr)'")
-                
-                completionHandlerGET(nil, error as! NSError)
-            } catch {
-                print("failed response")
-            }
-            /* 5/6. Parse the data and use the data (happens in completion handler) */
-            
-            self.convertDataWithCompletionHandler(data: data, completionHandlerForConvertData: completionHandlerGET)
-        }
-        task.resume()
-        return task
-    }
-    
     func taskForUdacityGETMethod(_ method: String, completionHandlerForGET: @escaping (_ result: AnyObject?, _ error: NSError?) -> Void) -> URLSessionDataTask {
         
         let request = NSMutableURLRequest(url: URL(string: "\(Constants.UdacityURL)\(method)")!)
@@ -301,31 +246,10 @@ class Client: NSObject {
             let range = Range(5..<data.count)
             let newData = data.subdata(in: range)
             
-            self.clearUserData()
             self.convertDataWithCompletionHandler(data: newData, completionHandlerForConvertData: completionHandlerForSession)
         }
         task.resume()
         return task
-    }
-    
-    func clearUserData() {
-        // clear out all user data after successful logout
-//        arrayOfStudentLocations = []
-//
-//        UserLocation.NewUserLocation.latitude = 0.0
-//        UserLocation.NewUserLocation.longitude = 0.0
-//        UserLocation.NewUserLocation.mapString = ""
-//        UserLocation.NewUserLocation.mediaURL = ""
-//
-//        UserLocation.UserData.firstName = ""
-//        UserLocation.UserData.lastName = ""
-//        UserLocation.UserData.objectId = ""
-//        UserLocation.UserData.uniqueKey = ""
-//        UserLocation.UserData.mapString = ""
-//        UserLocation.UserData.mediaURL = ""
-//
-//        UserLocation.userLocationDictionary = [:]
-        
     }
     
     // substitute the key for the value that is contained within the method name

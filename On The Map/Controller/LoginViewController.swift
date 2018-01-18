@@ -41,7 +41,7 @@ class LoginViewController: UIViewController {
         if credentialsFilled() {
             if let username = emailTextField.text, let password = passwordTextField.text {
                 
-                Client.sharedInstance.getSessionID(username, password) { (sessionID, error) in
+                Client.sharedInstance.getUserId(username, password) { (userId, error) in
                     
                     performUIUpdatesOnMain({
                         
@@ -50,20 +50,20 @@ class LoginViewController: UIViewController {
                             return
                         }
                         
-                        guard let userID = sessionID else {
+                        guard let userId = userId else {
                             Alerts.errorAlert(title: "Error logging in", message: error!, view: self)
                             return
                         }
                         
-                        self.completeLogin(userID: userID)
+                        self.completeLogin(userId: userId)
                     })
                 }
             }
         }
     }
     
-    func completeLogin(userID: String) {
-        Client.sharedInstance.getUdacityUserInfo(userID: userID) { (result, error) in
+    func completeLogin(userId: String) {
+        Client.sharedInstance.getUdacityUserInfo(userId: userId) { (result, error) in
             
             performUIUpdatesOnMain({
                 

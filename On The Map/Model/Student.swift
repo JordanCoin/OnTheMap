@@ -57,12 +57,13 @@ struct Student {
     
     static func studentsFromResults(results: [[String: AnyObject]]) {
         
+        var students = [Student]()
+        
         for result in results {
             if let student = Student(dictionary: result) {
-                print(student.location)
-                StudentDataSource.sharedInstance.studentData.append(student)
-//                print("Student array count: ", StudentDataSource.sharedInstance.studentData.count)
+                students.append(student)
             }
         }
+        StudentDataSource.sharedInstance.studentData = students
     }
 }

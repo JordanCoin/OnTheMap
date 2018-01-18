@@ -32,8 +32,8 @@ class MapViewController: UIViewController, MKMapViewDelegate {
                     Alerts.errorAlert(title: "Failed to Reload!", message: (error?.localizedDescription)!, view: self)
                     return
                 }
+                
                 Student.studentsFromResults(results: results!)
-//                StudentDataSource.sharedInstance.studentData.append(student!)
                 self.mapView.addAnnotations(self.pinLocations())
                 self.mapView.reloadInputViews()
             })
@@ -51,7 +51,6 @@ class MapViewController: UIViewController, MKMapViewDelegate {
                 }
                 self.tabBarController?.dismiss(animated: true, completion: nil)
                 self.saveLogin.removeObject(forKey: "loggedIn")
-//                Client.sharedInstance.userKey.removeObject(forKey: "key")
             }
         })
     }

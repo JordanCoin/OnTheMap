@@ -13,7 +13,6 @@ class LocationTableViewController: UITableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-//        tableView.reloadData()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -36,7 +35,6 @@ class LocationTableViewController: UITableViewController {
                     
                     Student.studentsFromResults(results: results!)
                     
-                    //                StudentDataSource.sharedInstance.studentData.append(student!)
                     self.tableView.beginUpdates()
                     self.tableView.reloadData()
                     self.tableView.endUpdates()
@@ -54,7 +52,6 @@ class LocationTableViewController: UITableViewController {
                 }
                 
                 self.saveLogin.removeObject(forKey: "loggedIn")
-//                Client.sharedInstance.userKey.removeObject(forKey: "key")
                 self.tabBarController?.dismiss(animated: true, completion: nil)
             }
         })
