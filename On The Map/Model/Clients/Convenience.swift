@@ -31,15 +31,37 @@ extension Client {
                 self.userKey.set(sessionID, forKey: "key")
                 completionForSession(sessionID, nil)
                 return
-            } else {
+            }
+            
+            
+            else {
                 completionForSession(nil, error?.localizedDescription)
 
             }
         }
     }
     
+    func updateStudentLocation(_ objectId: String, _ completionHandlerForPUTStudentLoc: @escaping (_ success: Bool, _ error: NSError?) -> Void) {
+        
+        if let method = substituteKeyInMethod(Constants.Methods.ParsePutStudentLocation, key: "objectId", value: objectId) {
+            
+            let _ = taskForPUTMethod(method) { (results, error) in
+                
+                if let error = error {
+                    completionHandlerForPUTStudentLoc(false, error)
+                }
+                guard let results = results?[Constants.JSONResponseKeys.Results] as? [[String: AnyObject]] else { return }
+                
+                DispatchQueue.main.async {
+                    completionHandlerForPUTStudentLoc(true, nil)
+                }
+            }
+        }
+    }
+    
+    
     // MARK: - GET Student Location Method
-    func getStudentLocation(_ completionHandlerForGETStudentLoc: @escaping (_ result: Student?, _ error: NSError?) -> Void) {
+    func getStudentLocation(_ completionHandlerForGETStudentLoc: @escaping (_ results: [[String: AnyObject]]?, _ error: NSError?) -> Void) {
         
         let _ = taskForGETMethod(Constants.Methods.ParseStudentLocation) { (results, error) in
             
@@ -47,13 +69,11 @@ extension Client {
             if let error = error {
                 completionHandlerForGETStudentLoc(nil, error)
             } else {
+                
                 // if there was no error we know we had a successful response
-                if let results = results?[Constants.JSONResponseKeys.Results] as? [[String:AnyObject]] {
-                    let students = Student.studentsFromResults(results: results)
-                    completionHandlerForGETStudentLoc(students, nil)
-                } else {
-                   completionHandlerForGETStudentLoc(nil, NSError(domain: "getStudentLocation parsing", code: 0, userInfo: [NSLocalizedDescriptionKey: "Could not parse getStudentLocationData"]))
-                }
+                guard let result = results?[Constants.JSONResponseKeys.Results] as? [[String: AnyObject]] else { return }
+                
+                completionHandlerForGETStudentLoc(result, nil)
             }
         }
     }
@@ -71,7 +91,7 @@ extension Client {
                 }
                 
                 guard let results = results,
-                    let userInfo = results["user"] as? [String:AnyObject],
+                    let userInfo = results["user"] as? [String: AnyObject],
                     let firstName = userInfo[Constants.JSONResponseKeys.UdacityFirstName] as? String,
                     let lastName = userInfo[Constants.JSONResponseKeys.UdacityLastName] as? String
                     else {
@@ -79,69 +99,47 @@ extension Client {
                         return
                 }
                 
-                // create a User object to be passed back via the completionHandler
-                let user = User(firstName: firstName, lastName: lastName, userId: userID)
-                completionHandlerGETUserInfo(user, nil)
+                DispatchQueue.main.async {
+                    // create a User object to be passed back via the completionHandler
+                    let user = User(firstName: firstName, lastName: lastName, userId: userID)
+                    completionHandlerGETUserInfo(user, nil)
+                }
             }
         }
     }
     
     // MARK: - POST Student Location Method
-    func postStudentLocation(userId: String, firstName: String, lastName: String, mediaURL: String, latitude: CLLocationDegrees, longitude: CLLocationDegrees, location: String, completionHandlerForPOSTStudentLoc: @escaping (_ result: AnyObject?, _ errorString: String?) -> Void) {
+    func postStudentLocation(userId: String, firstName: String, lastName: String, mediaURL: String, latitude: CLLocationDegrees, longitude: CLLocationDegrees, location: String, completionHandlerForPOSTStudentLoc: @escaping (_ result: Int?, _ error: NSError?) -> Void) {
         
         // create the jsonBody for the request and define the method to be used
         let jsonBody = "{\"\(Constants.JSONBodyKeys.UniqueKey)\": \"\(userId)\", \"\(Constants.JSONBodyKeys.FirstName)\": \"\(firstName)\", \"\(Constants.JSONBodyKeys.LastName)\": \"\(lastName)\",\"\(Constants.JSONBodyKeys.MapString)\": \"\(location)\", \"\(Constants.JSONBodyKeys.MediaURL)\": \"\(mediaURL)\",\"\(Constants.JSONBodyKeys.Latitude)\": \(latitude), \"\(Constants.JSONBodyKeys.Longitude)\": \(longitude)}"
         
-        let _ = taskForPOSTMethod(Constants.Methods.ParseStudentLocation, jsonBody: jsonBody) { (result, error) in
+        let _ = taskForPOSTMethod(Constants.Methods.ParseStudentLocation, jsonBody: jsonBody) { (results, error) in
             
             // check to see if there was an error returned
             guard (error == nil) else {
-                completionHandlerForPOSTStudentLoc(nil, error?.localizedDescription)
+                completionHandlerForPOSTStudentLoc(nil, error)
                 return
             }
-            
-            // if there was no error we know we had a successful response
-            completionHandlerForPOSTStudentLoc(result, nil)
+            completionHandlerForPOSTStudentLoc(1, nil)
         }
     }
    
     // MARK: Udacity Authentication (DELETE) Method
     
-    func logout(_ completionHandlerForSession: @escaping (_ success: Bool, _ error: NSError?) -> Void) {
+    func logout(_ completionHandlerForSession: @escaping (_ result: Int?, _ error: NSError?) -> Void) {
         
-        var request = URLRequest(url: URL(string: "https://www.udacity.com/api/session")!)
-        request.httpMethod = "DELETE"
-        var xsrfCookie: HTTPCookie? = nil
-        let sharedCookieStorage = HTTPCookieStorage.shared
-        for cookie in sharedCookieStorage.cookies! {
-            if cookie.name == "XSRF-TOKEN" { xsrfCookie = cookie }
-        }
-        if let xsrfCookie = xsrfCookie {
-            request.setValue(xsrfCookie.value, forHTTPHeaderField: "X-XSRF-TOKEN")
-        }
-        let session = URLSession.shared
-        
-        let task = session.dataTask(with: request) { data, response, error in
-            
-            func sendError(_ error: String) {
-                let userInfo = [NSLocalizedDescriptionKey : error]
-                completionHandlerForSession(false, NSError(domain: "taskForGETMethod", code: 1, userInfo: userInfo))
-            }
+        let _ = taskForUdacityDELETESession(Constants.Methods.UdacitySession) { (results, error)
+            in
             
             guard (error == nil) else {
-                sendError("error with logging out")
-                completionHandlerForSession(false, error as NSError?)
+                completionHandlerForSession(nil, error)
                 return
             }
             
-            guard let statusCode = (response as? HTTPURLResponse)?.statusCode, statusCode >= 200 && statusCode <= 299 else {
-                completionHandlerForSession(false, Alerts.ResponseError.Unknown as NSError?)
-                return
-            }
-            
-            completionHandlerForSession(true, nil)
+            self.userKey.removeObject(forKey: "key")
+            completionHandlerForSession(1, nil)
         }
-        task.resume()
     }
     
 }

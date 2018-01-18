@@ -54,6 +54,7 @@ class LoginViewController: UIViewController {
                             Alerts.errorAlert(title: "Error logging in", message: error!, view: self)
                             return
                         }
+                        
                         self.completeLogin(userID: userID)
                     })
                 }
@@ -75,9 +76,9 @@ class LoginViewController: UIViewController {
                     Alerts.errorAlert(title: "Error logging in", message: "Could not retrieve the custom USER struct from the Udacity users API", view: self)
                     return
                 }
-                
                 // save the user show the main nav bar, save the login with userdefault
                 self.appDelegate.user = user
+                Client.sharedInstance.objectID = user.userId
                 self.showMainTabController()
                 self.saveLogin.set(true, forKey: "loggedIn")
             })

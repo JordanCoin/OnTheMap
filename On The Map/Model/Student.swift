@@ -8,17 +8,9 @@
 
 import Foundation
 
-//struct StudentDelegate {
-//    static var sharedInstance = StudentDelegate()
-//    var array = [Student]()
-//    private init() {}
-//}
-
 struct Student {
     
-    static var sharedInstance = Student()
-    
-    let objectId: String
+    var objectId: String
     let uniqueKey: String
     let firstName: String
     let lastName: String
@@ -26,7 +18,6 @@ struct Student {
     let mediaURL: String
     let latitude: Double
     let longitude: Double
-    var array = [Student]()
     
     init() {
         objectId = ""
@@ -64,13 +55,14 @@ struct Student {
         self.longitude = longitude
     }
     
-    static func studentsFromResults(results: [[String:AnyObject]]) -> Student {
+    static func studentsFromResults(results: [[String: AnyObject]]) {
         
         for result in results {
             if let student = Student(dictionary: result) {
-                Student.sharedInstance.array.append(student)
+                print(student.location)
+                StudentDataSource.sharedInstance.studentData.append(student)
+//                print("Student array count: ", StudentDataSource.sharedInstance.studentData.count)
             }
         }
-        return Student.sharedInstance
     }
 }

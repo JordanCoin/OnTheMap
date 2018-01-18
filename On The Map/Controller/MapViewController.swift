@@ -25,36 +25,33 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         
         mapView.removeAnnotations(mapView.annotations)
         
-        let _ = Client.sharedInstance.getStudentLocation({ (value, error) in
-            
-            guard error == nil else {
-                Alerts.errorAlert(title: "Failed to Reload!", message: (error?.localizedDescription)!, view: self)
-                return
-            }
-                        
+        let _ = Client.sharedInstance.getStudentLocation({ (results, error) in
             performUIUpdatesOnMain({
+
+                guard error == nil else {
+                    Alerts.errorAlert(title: "Failed to Reload!", message: (error?.localizedDescription)!, view: self)
+                    return
+                }
+                Student.studentsFromResults(results: results!)
+//                StudentDataSource.sharedInstance.studentData.append(student!)
                 self.mapView.addAnnotations(self.pinLocations())
                 self.mapView.reloadInputViews()
             })
         })
+        
     }
     
     @IBAction func logoutTouched(_ sender: Any) {
         Client.sharedInstance.logout({ (success, error) in
-            
-            guard error == nil else {
-                print("error logging out")
-                print("\(String(describing: error?.localizedDescription))")
-                return
-            }
-
             DispatchQueue.main.async {
-                
-                if success {
-                    self.tabBarController?.dismiss(animated: true, completion: nil)
-                    self.saveLogin.removeObject(forKey: "loggedIn")
-                    Client.sharedInstance.userKey.removeObject(forKey: "key")
+                guard error == nil else {
+                    print("error logging out")
+                    print("\(String(describing: error?.localizedDescription))")
+                    return
                 }
+                self.tabBarController?.dismiss(animated: true, completion: nil)
+                self.saveLogin.removeObject(forKey: "loggedIn")
+//                Client.sharedInstance.userKey.removeObject(forKey: "key")
             }
         })
     }
@@ -76,7 +73,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         var annotations = [MKPointAnnotation]()
         
         // Go through our StudentLocation array and create the pins
-        for student in Student.sharedInstance.array {
+        for student in StudentDataSource.sharedInstance.studentData {
 
             let lat = CLLocationDegrees(student.latitude)
             let long = CLLocationDegrees(student.longitude)

@@ -25,6 +25,8 @@
 		89959D171FB51DC1008EAD92 /* SignUpViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89959D161FB51DC1008EAD92 /* SignUpViewController.swift */; };
 		89CC88511FBE337F00F5DA8B /* Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89CC88501FBE337F00F5DA8B /* Convenience.swift */; };
 		89CC88561FBE8B0A00F5DA8B /* BorderedButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89CC88551FBE8B0A00F5DA8B /* BorderedButton.swift */; };
+		89D95C40200EDD6800C61B63 /* StudentDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89D95C3F200EDD6800C61B63 /* StudentDataSource.swift */; };
+		89D95C42201020E200C61B63 /* UserLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89D95C41201020E200C61B63 /* UserLocation.swift */; };
 		89F605E21FE9BB3700582D05 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89F605E11FE9BB3700582D05 /* User.swift */; };
 		89F605E61FEDD38B00582D05 /* Student.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89F605E51FEDD38B00582D05 /* Student.swift */; };
 /* End PBXBuildFile section */
@@ -50,6 +52,8 @@
 		89959D161FB51DC1008EAD92 /* SignUpViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUpViewController.swift; sourceTree = "<group>"; };
 		89CC88501FBE337F00F5DA8B /* Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Convenience.swift; sourceTree = "<group>"; };
 		89CC88551FBE8B0A00F5DA8B /* BorderedButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BorderedButton.swift; sourceTree = "<group>"; };
+		89D95C3F200EDD6800C61B63 /* StudentDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudentDataSource.swift; sourceTree = "<group>"; };
+		89D95C41201020E200C61B63 /* UserLocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserLocation.swift; sourceTree = "<group>"; };
 		89F605E11FE9BB3700582D05 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		89F605E51FEDD38B00582D05 /* Student.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Student.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -108,6 +112,8 @@
 			children = (
 				89F605E11FE9BB3700582D05 /* User.swift */,
 				89F605E51FEDD38B00582D05 /* Student.swift */,
+				89D95C41201020E200C61B63 /* UserLocation.swift */,
+				89D95C3F200EDD6800C61B63 /* StudentDataSource.swift */,
 				89959D0F1FAE4780008EAD92 /* Clients */,
 			);
 			path = Model;
@@ -254,6 +260,8 @@
 				89959D171FB51DC1008EAD92 /* SignUpViewController.swift in Sources */,
 				89F605E61FEDD38B00582D05 /* Student.swift in Sources */,
 				89215D781FD6048A0050B474 /* CurrentLocationViewController.swift in Sources */,
+				89D95C42201020E200C61B63 /* UserLocation.swift in Sources */,
+				89D95C40200EDD6800C61B63 /* StudentDataSource.swift in Sources */,
 				89CC88511FBE337F00F5DA8B /* Convenience.swift in Sources */,
 				89CC88561FBE8B0A00F5DA8B /* BorderedButton.swift in Sources */,
 				898B25FC1FAB972300581A78 /* LoginViewController.swift in Sources */,

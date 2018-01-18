@@ -82,32 +82,29 @@ class CurrentLocationViewController: UIViewController, MKMapViewDelegate {
     }
     
     func postStudentLocation() {
-        performUIUpdatesOnMain {
-            guard let userID = self.user?.userId,
-                let firstName = self.user?.firstName,
-                let lastName = self.user?.lastName,
-                let mediaURL = self.link,
-                let location = self.location,
-                let latitude = self.latitude,
-                let longitude = self.longitude
-                else {
-                    Alerts.errorAlert(title: "Error posting Data!", message: "Could not unwrap properties passed in", view: self)
-                    return
-            }
+        guard let userID = self.user?.userId,
+            let firstName = self.user?.firstName,
+            let lastName = self.user?.lastName,
+            let mediaURL = self.link,
+            let location = self.location,
+            let latitude = self.latitude,
+            let longitude = self.longitude
+            else {
+                Alerts.errorAlert(title: "Error posting Data!", message: "Could not unwrap properties passed in", view: self)
+                return
+        }
+        
+        let _ = Client.sharedInstance.postStudentLocation(userId: userID, firstName: firstName, lastName: lastName, mediaURL: mediaURL, latitude: latitude, longitude: longitude, location: location) { (success, error) in
             
-            let _ = Client.sharedInstance.postStudentLocation(userId: userID, firstName: firstName, lastName: lastName, mediaURL: mediaURL, latitude: latitude, longitude: longitude, location: location) { (results, errorString) in
+            DispatchQueue.main.async {
                 
-                DispatchQueue.main.async {
-                    
-                    guard (errorString == nil) else {
-                        Alerts.errorAlert(title: "Sorry, we weren't able to post your location", message: errorString!, view: self)
-                        return
-                    }
-                    
-                    if let _ = results {
-                        self.dismiss(animated: true, completion: nil)
-                    }
+                guard (error == nil) else {
+                    Alerts.errorAlert(title: "Sorry, we weren't able to post your location", message: (error?.localizedDescription)!, view: self)
+                    return
                 }
+                
+                self.dismiss(animated: true, completion: nil)
+                
             }
         }
     }
